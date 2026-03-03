@@ -3,6 +3,12 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* 
+ * 恋爱脑 LoveBrain - Jelly Pop 弹性美学
+ * 设计理念：参考多邻国的游戏化设计 + 黏土拟态质感
+ * 主色：蜜桃粉渐变 / 辅色：薄荷绿 / CTA：活力橙/多邻国绿
+ */
+
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -40,77 +46,56 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  /* Custom LoveBrain colors */
+  --color-love-pink: #FF6B8A;
+  --color-love-peach: #FF9A9E;
+  --color-love-rose: #FECFEF;
+  --color-love-mint: #4ECDC4;
+  --color-love-sky: #A8EDEA;
+  --color-love-green: #58CC02;
+  --color-love-green-dark: #46a302;
+  --color-love-orange: #FF6B35;
+  --color-love-yellow: #FFC800;
+  --color-love-purple: #B8A9C9;
+  --color-love-cream: #FFFBF5;
+  --font-family-display: "Nunito", "Noto Sans SC", sans-serif;
+  --font-family-body: "Noto Sans SC", sans-serif;
 }
 
 :root {
-  --primary: var(--color-blue-700);
-  --primary-foreground: var(--color-blue-50);
-  --sidebar-primary: var(--color-blue-600);
-  --sidebar-primary-foreground: var(--color-blue-50);
-  --chart-1: var(--color-blue-300);
-  --chart-2: var(--color-blue-500);
-  --chart-3: var(--color-blue-600);
-  --chart-4: var(--color-blue-700);
-  --chart-5: var(--color-blue-800);
-  --radius: 0.65rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.235 0.015 65);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.235 0.015 65);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.235 0.015 65);
-  --secondary: oklch(0.98 0.001 286.375);
-  --secondary-foreground: oklch(0.4 0.015 65);
-  --muted: oklch(0.967 0.001 286.375);
-  --muted-foreground: oklch(0.552 0.016 285.938);
-  --accent: oklch(0.967 0.001 286.375);
-  --accent-foreground: oklch(0.141 0.005 285.823);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.92 0.004 286.32);
-  --input: oklch(0.92 0.004 286.32);
-  --ring: oklch(0.623 0.214 259.815);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.235 0.015 65);
-  --sidebar-accent: oklch(0.967 0.001 286.375);
-  --sidebar-accent-foreground: oklch(0.141 0.005 285.823);
-  --sidebar-border: oklch(0.92 0.004 286.32);
-  --sidebar-ring: oklch(0.623 0.214 259.815);
-}
-
-.dark {
-  --primary: var(--color-blue-700);
-  --primary-foreground: var(--color-blue-50);
-  --sidebar-primary: var(--color-blue-500);
-  --sidebar-primary-foreground: var(--color-blue-50);
-  --background: oklch(0.141 0.005 285.823);
-  --foreground: oklch(0.85 0.005 65);
-  --card: oklch(0.21 0.006 285.885);
-  --card-foreground: oklch(0.85 0.005 65);
-  --popover: oklch(0.21 0.006 285.885);
-  --popover-foreground: oklch(0.85 0.005 65);
-  --secondary: oklch(0.24 0.006 286.033);
-  --secondary-foreground: oklch(0.7 0.005 65);
-  --muted: oklch(0.274 0.006 286.033);
-  --muted-foreground: oklch(0.705 0.015 286.067);
-  --accent: oklch(0.274 0.006 286.033);
-  --accent-foreground:  oklch(0.92 0.005 65);
-  --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.488 0.243 264.376);
-  --chart-1: var(--color-blue-300);
-  --chart-2: var(--color-blue-500);
-  --chart-3: var(--color-blue-600);
-  --chart-4: var(--color-blue-700);
-  --chart-5: var(--color-blue-800);
-  --sidebar: oklch(0.21 0.006 285.885);
-  --sidebar-foreground: oklch(0.85 0.005 65);
-  --sidebar-accent: oklch(0.274 0.006 286.033);
-  --sidebar-accent-foreground:  oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.488 0.243 264.376);
+  --primary: #FF6B8A;
+  --primary-foreground: #ffffff;
+  --sidebar-primary: #FF6B8A;
+  --sidebar-primary-foreground: #ffffff;
+  --chart-1: #FF6B8A;
+  --chart-2: #4ECDC4;
+  --chart-3: #FFC800;
+  --chart-4: #FF6B35;
+  --chart-5: #B8A9C9;
+  --radius: 1rem;
+  --background: #FFFBF5;
+  --foreground: #2C3E50;
+  --card: #ffffff;
+  --card-foreground: #2C3E50;
+  --popover: #ffffff;
+  --popover-foreground: #2C3E50;
+  --secondary: #FFF0F3;
+  --secondary-foreground: #2C3E50;
+  --muted: #F7F3F0;
+  --muted-foreground: #7f8c8d;
+  --accent: #FFF0F3;
+  --accent-foreground: #2C3E50;
+  --destructive: #e74c3c;
+  --destructive-foreground: #ffffff;
+  --border: #f0e6e0;
+  --input: #f0e6e0;
+  --ring: #FF6B8A;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #2C3E50;
+  --sidebar-accent: #FFF0F3;
+  --sidebar-accent-foreground: #2C3E50;
+  --sidebar-border: #f0e6e0;
+  --sidebar-ring: #FF6B8A;
 }
 
 @layer base {
@@ -119,6 +104,9 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: "Noto Sans SC", "Nunito", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),
@@ -134,24 +122,11 @@
 }
 
 @layer components {
-  /**
-   * Custom container utility that centers content and adds responsive padding.
-   *
-   * This overrides Tailwind's default container behavior to:
-   * - Auto-center content (mx-auto)
-   * - Add responsive horizontal padding
-   * - Set max-width for large screens
-   *
-   * Usage: <div className="container">...</div>
-   *
-   * For custom widths, use max-w-* utilities directly:
-   * <div className="max-w-6xl mx-auto px-4">...</div>
-   */
   .container {
     width: 100%;
     margin-left: auto;
     margin-right: auto;
-    padding-left: 1rem; /* 16px - mobile padding */
+    padding-left: 1rem;
     padding-right: 1rem;
   }
 
@@ -162,16 +137,230 @@
 
   @media (min-width: 640px) {
     .container {
-      padding-left: 1.5rem; /* 24px - tablet padding */
+      padding-left: 1.5rem;
       padding-right: 1.5rem;
     }
   }
 
   @media (min-width: 1024px) {
     .container {
-      padding-left: 2rem; /* 32px - desktop padding */
+      padding-left: 2rem;
       padding-right: 2rem;
-      max-width: 1280px; /* Standard content width */
+      max-width: 1280px;
     }
   }
+
+  /* Phone simulator frame */
+  .phone-frame {
+    width: 375px;
+    height: 812px;
+    border-radius: 40px;
+    overflow: hidden;
+    position: relative;
+    background: var(--background);
+    box-shadow: 
+      0 0 0 2px #1a1a1a,
+      0 0 0 6px #333,
+      0 0 0 8px #1a1a1a,
+      0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+
+  .phone-frame::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 150px;
+    height: 28px;
+    background: #1a1a1a;
+    border-radius: 0 0 20px 20px;
+    z-index: 50;
+  }
+
+  .phone-content {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .phone-content::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* 3D Jelly Button - Duolingo style */
+  .btn-jelly {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-family: "Nunito", "Noto Sans SC", sans-serif;
+    border-radius: 16px;
+    transition: all 0.1s ease;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .btn-jelly-green {
+    background: #58CC02;
+    color: white;
+    box-shadow: 0 5px 0 #46a302, 0 6px 8px rgba(0,0,0,0.15);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  }
+
+  .btn-jelly-green:active {
+    transform: translateY(4px);
+    box-shadow: 0 1px 0 #46a302, 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .btn-jelly-pink {
+    background: #FF6B8A;
+    color: white;
+    box-shadow: 0 5px 0 #e0526e, 0 6px 8px rgba(0,0,0,0.15);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  }
+
+  .btn-jelly-pink:active {
+    transform: translateY(4px);
+    box-shadow: 0 1px 0 #e0526e, 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .btn-jelly-outline {
+    background: white;
+    color: #2C3E50;
+    border: 2px solid #e0e0e0;
+    box-shadow: 0 5px 0 #d0d0d0, 0 6px 8px rgba(0,0,0,0.08);
+  }
+
+  .btn-jelly-outline:active {
+    transform: translateY(4px);
+    box-shadow: 0 1px 0 #d0d0d0, 0 2px 4px rgba(0,0,0,0.05);
+  }
+
+  .btn-jelly-orange {
+    background: #FF6B35;
+    color: white;
+    box-shadow: 0 5px 0 #e05520, 0 6px 8px rgba(0,0,0,0.15);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  }
+
+  .btn-jelly-orange:active {
+    transform: translateY(4px);
+    box-shadow: 0 1px 0 #e05520, 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  /* Mascot floating animation */
+  @keyframes mascot-float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+  }
+
+  .mascot-float {
+    animation: mascot-float 3s ease-in-out infinite;
+  }
+
+  @keyframes mascot-bounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+
+  .mascot-bounce {
+    animation: mascot-bounce 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-ring {
+    0% { transform: scale(0.8); opacity: 1; }
+    100% { transform: scale(1.5); opacity: 0; }
+  }
+
+  .pulse-ring {
+    animation: pulse-ring 1.5s ease-out infinite;
+  }
+
+  /* Tab bar */
+  .tab-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 70px;
+    background: white;
+    border-top: 1px solid #f0e6e0;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 8px;
+    padding-bottom: env(safe-area-inset-bottom, 8px);
+    z-index: 40;
+  }
+
+  .tab-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 6px 12px;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    font-size: 10px;
+    color: #b0b0b0;
+  }
+
+  .tab-item.active {
+    color: #FF6B8A;
+  }
+
+  .tab-item.active svg {
+    transform: scale(1.15);
+  }
+
+  /* Progress bar */
+  .progress-bar {
+    height: 12px;
+    background: #e8e8e8;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 6px;
+    background: linear-gradient(90deg, #58CC02, #7FE030);
+    transition: width 0.8s ease-in-out;
+  }
+
+  /* Card styles */
+  .love-card {
+    background: white;
+    border-radius: 20px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border: 1px solid #f0e6e0;
+  }
+
+  /* Status bar placeholder */
+  .status-bar {
+    height: 44px;
+    padding: 0 16px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: 600;
+    padding-bottom: 4px;
+  }
+}
+
+
+/* Scrollbar hide utility */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
