@@ -1,8 +1,8 @@
 /*
  * FlowNavigator - 页面流程导航器
- * 根据AppContext的currentScreen渲染对应页面
+ * 根据指定性别的 state.currentScreen 渲染对应页面
  */
-import { useApp } from "@/contexts/AppContext";
+import { useApp, Gender } from "@/contexts/AppContext";
 import { AnimatePresence, motion } from "framer-motion";
 import SplashScreen from "@/pages/SplashScreen";
 import WelcomeScreen from "@/pages/WelcomeScreen";
@@ -11,6 +11,7 @@ import BindScreen from "@/pages/BindScreen";
 import OnboardingScreen from "@/pages/OnboardingScreen";
 import HomeScreen from "@/pages/HomeScreen";
 import SignalSendScreen from "@/pages/SignalSendScreen";
+import SignalReceiveScreen from "@/pages/SignalReceiveScreen";
 import ChatScreen from "@/pages/ChatScreen";
 import TimelineScreen from "@/pages/TimelineScreen";
 import CollectionScreen from "@/pages/CollectionScreen";
@@ -22,8 +23,11 @@ import AlbumScreen from "@/pages/AlbumScreen";
 import SettingsScreen from "@/pages/SettingsScreen";
 import EndRelationshipScreen from "@/pages/EndRelationshipScreen";
 import LoadingScreen from "@/pages/LoadingScreen";
+import CosmosLetterScreen from "@/pages/CosmosLetterScreen";
+import TravelMapScreen from "@/pages/TravelMapScreen";
+import TopicCardsScreen from "@/pages/TopicCardsScreen";
 
-const screenMap: Record<string, React.ComponentType> = {
+const screenMap: Record<string, React.ComponentType<{ gender: Gender }>> = {
   splash: SplashScreen,
   welcome: WelcomeScreen,
   login: LoginScreen,
@@ -32,6 +36,7 @@ const screenMap: Record<string, React.ComponentType> = {
   onboarding: OnboardingScreen,
   home: HomeScreen,
   "signal-send": SignalSendScreen,
+  "signal-receive": SignalReceiveScreen,
   chat: ChatScreen,
   "chat-detail": ChatScreen,
   timeline: TimelineScreen,
@@ -48,23 +53,28 @@ const screenMap: Record<string, React.ComponentType> = {
   settings: SettingsScreen,
   "end-relationship": EndRelationshipScreen,
   loading: LoadingScreen,
+  "cosmos-letter": CosmosLetterScreen,
+  "travel-map": TravelMapScreen,
+  "topic-cards": TopicCardsScreen,
 };
 
-export default function FlowNavigator() {
-  const { currentScreen } = useApp();
-  const Screen = screenMap[currentScreen] || HomeScreen;
+export default function FlowNavigator({ gender }: { gender?: Gender }) {
+  const { femaleState, maleState, activeGender } = useApp();
+  const g = gender || activeGender;
+  const state = g === "female" ? femaleState : maleState;
+  const Screen = screenMap[state.currentScreen] || HomeScreen;
 
   return (
     <AnimatePresence mode="wait">
       <motion.div
-        key={currentScreen}
+        key={`${g}-${state.currentScreen}`}
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: -20 }}
         transition={{ duration: 0.2 }}
         className="h-full"
       >
-        <Screen />
+        <Screen gender={g} />
       </motion.div>
     </AnimatePresence>
   );

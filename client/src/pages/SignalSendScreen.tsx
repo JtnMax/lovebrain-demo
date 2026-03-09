@@ -1,11 +1,11 @@
 /*
  * SignalSendScreen - 关心信号发送页
- * 预设信号选择 + 自定义输入 + 庆祝动画
+ * 支持双人视角 - 发送后对方手机会收到通知
  */
-import { useApp } from "@/contexts/AppContext";
-import { MASCOT, CARE_SIGNALS, MOCK_USER } from "@/lib/constants";
+import { useApp, Gender } from "@/contexts/AppContext";
+import { MASCOT, CARE_SIGNALS, USERS, THEME } from "@/lib/constants";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Send, Sparkles, Heart } from "lucide-react";
+import { ArrowLeft, Send, Sparkles } from "lucide-react";
 import { useState } from "react";
 
 function CelebrationParticles() {
@@ -27,8 +27,7 @@ function CelebrationParticles() {
           style={{ fontSize: p.size }}
           initial={{ x: 0, y: 0, opacity: 1, scale: 0 }}
           animate={{
-            x: p.x,
-            y: p.y,
+            x: p.x, y: p.y,
             opacity: [0, 1, 1, 0],
             scale: [0, 1.2, 1, 0.5],
             rotate: p.rotate,
@@ -42,25 +41,40 @@ function CelebrationParticles() {
   );
 }
 
-export default function SignalSendScreen() {
-  const { navigate, toast } = useApp();
+export default function SignalSendScreen({ gender }: { gender: Gender }) {
+  const { navigate, toast, sendSignal } = useApp();
   const [selected, setSelected] = useState<number | null>(null);
   const [sent, setSent] = useState(false);
   const [custom, setCustom] = useState("");
+  const t = gender === "female" ? THEME.female : THEME.male;
+  const partner = gender === "female" ? USERS.male : USERS.female;
+  const targetGender: Gender = gender === "female" ? "male" : "female";
 
   const handleSend = () => {
+    const signal = selected ? CARE_SIGNALS.find((s) => s.id === selected) : null;
+    const text = signal ? signal.text : custom;
+    const emoji = signal ? signal.emoji : "💌";
+
+    sendSignal({
+      from: gender,
+      to: targetGender,
+      type: "care",
+      emoji,
+      text,
+    });
+
     setSent(true);
+    // AppContext.sendSignal now handles navigating sender to home and receiver to signal-receive
     setTimeout(() => {
-      toast("关心信号已送达！");
-      setTimeout(() => navigate("home"), 2000);
-    }, 1200);
+      toast("关心信号已送达！", gender);
+    }, 1500);
   };
 
   return (
-    <div className="h-full flex flex-col bg-[#FFFBF5] relative">
+    <div className="h-full flex flex-col relative" style={{ background: t.bg }}>
       {/* Header */}
       <div className="flex items-center px-4 pt-12 pb-4">
-        <button onClick={() => navigate("home")} className="p-2">
+        <button onClick={() => navigate("home", gender)} className="p-2">
           <ArrowLeft size={24} color="#2C3E50" />
         </button>
         <h2 className="flex-1 text-center text-lg font-bold text-[#2C3E50]">发送关心信号</h2>
@@ -76,11 +90,11 @@ export default function SignalSendScreen() {
             className="flex-1 flex flex-col px-4"
           >
             {/* Target */}
-            <div className="flex items-center justify-center gap-3 mb-6">
+            <div className="flex items-center justify-center gap-3 mb-5">
               <span className="text-sm text-[#7f8c8d]">发送给</span>
-              <div className="flex items-center gap-2 bg-white rounded-full px-4 py-2 shadow-sm border border-[#f0e6e0]">
-                <img src={MOCK_USER.partnerAvatar} alt="" className="w-6 h-6 rounded-full object-cover" />
-                <span className="font-bold text-[#2C3E50] text-sm">{MOCK_USER.partnerName}</span>
+              <div className="flex items-center gap-2 bg-white rounded-full px-4 py-2 shadow-sm border" style={{ borderColor: t.cardBorder }}>
+                <img src={partner.avatar} alt="" className="w-6 h-6 rounded-full object-cover" />
+                <span className="font-bold text-[#2C3E50] text-sm">{partner.name}</span>
               </div>
             </div>
 
@@ -94,13 +108,11 @@ export default function SignalSendScreen() {
                   transition={{ delay: i * 0.05 }}
                   onClick={() => setSelected(signal.id)}
                   className={`love-card flex items-center gap-3 py-4 transition-all ${
-                    selected === signal.id
-                      ? "border-2 shadow-md scale-[1.02]"
-                      : ""
+                    selected === signal.id ? "border-2 shadow-md scale-[1.02]" : ""
                   }`}
                   style={{
-                    borderColor: selected === signal.id ? signal.color : undefined,
-                    background: selected === signal.id ? `${signal.color}10` : undefined,
+                    borderColor: selected === signal.id ? t.primary : undefined,
+                    background: selected === signal.id ? `${t.primary}10` : undefined,
                   }}
                 >
                   <motion.span
@@ -126,7 +138,6 @@ export default function SignalSendScreen() {
               />
             </div>
 
-            {/* Spacer */}
             <div className="flex-1" />
 
             {/* Send button */}
@@ -134,9 +145,13 @@ export default function SignalSendScreen() {
               <button
                 className={`w-full py-4 rounded-2xl text-lg font-bold flex items-center justify-center gap-2 transition-all ${
                   selected || custom
-                    ? "btn-jelly btn-jelly-pink"
+                    ? "text-white shadow-lg"
                     : "bg-[#e8e8e8] text-[#b0b0b0]"
                 }`}
+                style={selected || custom ? {
+                  background: t.primary,
+                  boxShadow: `0 5px 0 ${t.primaryDark}, 0 6px 8px rgba(0,0,0,0.15)`,
+                } : undefined}
                 onClick={handleSend}
                 disabled={!selected && !custom}
               >
@@ -169,9 +184,9 @@ export default function SignalSendScreen() {
             >
               <Sparkles size={32} color="#FFC800" className="mb-4 mx-auto" />
             </motion.div>
-            <h2 className="text-2xl font-black text-[#FF6B8A] mb-2 relative z-10">发送成功！</h2>
+            <h2 className="text-2xl font-black mb-2 relative z-10" style={{ color: t.primary }}>发送成功！</h2>
             <p className="text-[#7f8c8d] text-center relative z-10">
-              你的关心已经送达 {MOCK_USER.partnerName} 啦~
+              你的关心已经送达 {partner.name} 啦~
             </p>
           </motion.div>
         )}

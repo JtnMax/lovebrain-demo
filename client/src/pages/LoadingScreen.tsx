@@ -3,7 +3,8 @@
  * 参考多邻国加载页：吉祥物 + 加载提示 + 进度条
  * Jelly Pop 弹性美学
  */
-import { MASCOT } from "@/lib/constants";
+import { Gender } from "@/contexts/AppContext";
+import { MASCOT, THEME } from "@/lib/constants";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 
@@ -15,7 +16,8 @@ const tips = [
   "爱情需要经营，每一天都值得用心~",
 ];
 
-export default function LoadingScreen() {
+export default function LoadingScreen({ gender }: { gender: Gender }) {
+  const t = gender === "female" ? THEME.female : THEME.male;
   const [tipIndex, setTipIndex] = useState(0);
   const [progress, setProgress] = useState(0);
 
@@ -37,7 +39,7 @@ export default function LoadingScreen() {
   }, []);
 
   return (
-    <div className="h-full flex flex-col items-center justify-center bg-gradient-to-b from-[#FFF0F3] to-[#FFFBF5] px-8">
+    <div className="h-full flex flex-col items-center justify-center px-8" style={{ background: `linear-gradient(to bottom, ${t.primaryLight}, ${t.bg})` }}>
       {/* Mascot with bounce */}
       <motion.div
         className="relative mb-8"
@@ -61,7 +63,8 @@ export default function LoadingScreen() {
       <div className="w-48 mb-6">
         <div className="h-3 bg-[#e8e8e8] rounded-full overflow-hidden">
           <motion.div
-            className="h-full rounded-full bg-gradient-to-r from-[#FF6B8A] to-[#FF9A9E]"
+            className="h-full rounded-full"
+            style={{ background: `linear-gradient(to right, ${t.primary}, ${t.accent})` }}
             initial={{ width: 0 }}
             animate={{ width: `${Math.min(progress, 95)}%` }}
             transition={{ duration: 0.3 }}
@@ -83,7 +86,8 @@ export default function LoadingScreen() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -10 }}
-        className="love-card bg-[#FFF0F3] border-[#FFD4DE] max-w-[280px]"
+        className="love-card max-w-[280px]"
+        style={{ background: t.primaryLight, borderColor: t.accent }}
       >
         <p className="text-[#2C3E50] text-sm text-center leading-relaxed">
           💡 {tips[tipIndex]}

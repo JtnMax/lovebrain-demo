@@ -1,10 +1,9 @@
 /*
  * ProfileScreen - 个人资料/我的页面
- * 参考多邻国个人资料页设计
  * Jelly Pop 弹性美学
  */
-import { useApp } from "@/contexts/AppContext";
-import { MASCOT, MOCK_USER } from "@/lib/constants";
+import { useApp, Gender } from "@/contexts/AppContext";
+import { MASCOT, USERS, COUPLE_INFO, THEME } from "@/lib/constants";
 import { motion } from "framer-motion";
 import TabBar from "@/components/TabBar";
 import {
@@ -21,16 +20,18 @@ const menuItems = [
   { icon: HelpCircle, label: "帮助与反馈", screen: "settings" as const, color: "#7f8c8d" },
 ];
 
-export default function ProfileScreen() {
+export default function ProfileScreen({ gender }: { gender: Gender }) {
+  const t = gender === "female" ? THEME.female : THEME.male;
+  const user = gender === "female" ? USERS.female : USERS.male;
   const { navigate, toast } = useApp();
 
   return (
-    <div className="h-full flex flex-col bg-[#FFFBF5] relative">
+    <div className="h-full flex flex-col relative" style={{ background: t.bg }}>
       {/* Header with gradient */}
-      <div className="bg-gradient-to-b from-[#FFF0F3] to-[#FFFBF5] pt-12 pb-4 px-4">
+      <div className="pt-12 pb-4 px-4" style={{ background: `linear-gradient(to bottom, ${t.primaryLight}, ${t.bg})` }}>
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-black text-[#2C3E50]">我的</h1>
-          <button onClick={() => navigate("settings")} className="p-2">
+          <button onClick={() => navigate("settings", gender)} className="p-2">
             <Settings size={22} color="#2C3E50" />
           </button>
         </div>
@@ -43,9 +44,10 @@ export default function ProfileScreen() {
         >
           <div className="relative">
             <img
-              src={MOCK_USER.avatar}
-              alt={MOCK_USER.name}
-              className="w-16 h-16 rounded-full object-cover border-3 border-[#FF6B8A]"
+              src={user.avatar}
+              alt={user.name}
+              className="w-16 h-16 rounded-full object-cover border-3"
+              style={{ borderColor: t.primary }}
             />
             <motion.div
               className="absolute -bottom-1 -right-1 w-6 h-6 bg-[#FFC800] rounded-full border-2 border-white flex items-center justify-center"
@@ -56,8 +58,8 @@ export default function ProfileScreen() {
             </motion.div>
           </div>
           <div className="flex-1">
-            <p className="font-black text-[#2C3E50] text-lg">{MOCK_USER.name}</p>
-            <p className="text-xs text-[#7f8c8d]">@lovebrain · {MOCK_USER.joinDate} 加入</p>
+            <p className="font-black text-[#2C3E50] text-lg">{user.name}</p>
+            <p className="text-xs text-[#7f8c8d]">@lovebrain · 2025-03-03 加入</p>
           </div>
           <ChevronRight size={20} color="#b0b0b0" />
         </motion.div>
@@ -71,9 +73,9 @@ export default function ProfileScreen() {
           transition={{ delay: 0.1 }}
           className="love-card"
         >
-          <div className="grid grid-cols-3 divide-x divide-[#f0e6e0]">
+          <div className="grid grid-cols-3 divide-x" style={{ borderColor: t.cardBorder }}>
             {[
-              { value: MOCK_USER.daysInLove, label: "在一起天数", color: "#FF6B8A" },
+              { value: COUPLE_INFO.daysInLove, label: "在一起天数", color: t.primary },
               { value: 42, label: "关心信号", color: "#FFC800" },
               { value: 18, label: "收藏数", color: "#4ECDC4" },
             ].map((stat, i) => (
@@ -130,8 +132,9 @@ export default function ProfileScreen() {
                 initial={{ x: -10, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.3 + i * 0.05 }}
-                onClick={() => navigate(item.screen)}
-                className="w-full flex items-center gap-3 px-4 py-3.5 border-b border-[#f0e6e0] last:border-b-0 active:bg-[#F7F3F0] transition-colors"
+                onClick={() => navigate(item.screen, gender)}
+                className="w-full flex items-center gap-3 px-4 py-3.5 border-b last:border-b-0 active:bg-[#F7F3F0] transition-colors"
+                style={{ borderColor: t.cardBorder }}
               >
                 <div
                   className="w-9 h-9 rounded-xl flex items-center justify-center"
@@ -148,7 +151,7 @@ export default function ProfileScreen() {
 
         {/* End relationship */}
         <button
-          onClick={() => navigate("end-relationship")}
+          onClick={() => navigate("end-relationship", gender)}
           className="w-full mt-4 love-card flex items-center gap-3 border-[#fde2e2]"
         >
           <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-red-50">
@@ -159,7 +162,7 @@ export default function ProfileScreen() {
         </button>
       </div>
 
-      <TabBar />
+      <TabBar gender={gender} />
     </div>
   );
 }

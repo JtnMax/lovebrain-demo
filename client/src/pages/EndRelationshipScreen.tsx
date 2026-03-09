@@ -3,21 +3,22 @@
  * 冷静期说明 + 确认流程 + 吉祥物安慰
  * Jelly Pop 弹性美学
  */
-import { useApp } from "@/contexts/AppContext";
-import { MASCOT, MOCK_USER } from "@/lib/constants";
+import { useApp, Gender } from "@/contexts/AppContext";
+import { MASCOT, USERS, COUPLE_INFO, THEME } from "@/lib/constants";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, AlertTriangle, Clock, Shield, Heart } from "lucide-react";
 import { useState } from "react";
 
-export default function EndRelationshipScreen() {
+export default function EndRelationshipScreen({ gender }: { gender: Gender }) {
+  const t = gender === "female" ? THEME.female : THEME.male;
   const { navigate, toast } = useApp();
   const [step, setStep] = useState(0); // 0: info, 1: confirm, 2: cooling
 
   return (
-    <div className="h-full flex flex-col bg-[#FFFBF5]">
+    <div className="h-full flex flex-col" style={{ background: t.bg }}>
       {/* Header */}
       <div className="flex items-center px-4 pt-12 pb-4">
-        <button onClick={() => navigate("profile")} className="p-2">
+        <button onClick={() => navigate("profile", gender)} className="p-2">
           <ArrowLeft size={24} color="#2C3E50" />
         </button>
         <h2 className="flex-1 text-center text-lg font-bold text-[#2C3E50]">结束关系</h2>
@@ -89,7 +90,7 @@ export default function EndRelationshipScreen() {
                 我想好了
               </button>
               <button
-                onClick={() => navigate("home")}
+                onClick={() => navigate("home", gender)}
                 className="btn-jelly btn-jelly-green w-full py-4 text-lg rounded-2xl"
               >
                 再想想 💕
@@ -119,13 +120,13 @@ export default function EndRelationshipScreen() {
             {/* Current partner */}
             <div className="love-card flex items-center gap-3 mb-4">
               <img
-                src={MOCK_USER.partnerAvatar}
+                src={USERS.male.avatar}
                 alt=""
                 className="w-12 h-12 rounded-full object-cover"
               />
               <div className="flex-1">
-                <p className="font-bold text-[#2C3E50] text-sm">{MOCK_USER.partnerName}</p>
-                <p className="text-xs text-[#7f8c8d]">在一起 {MOCK_USER.daysInLove} 天</p>
+                <p className="font-bold text-[#2C3E50] text-sm">{USERS.male.name}</p>
+                <p className="text-xs text-[#7f8c8d]">在一起 {COUPLE_INFO.daysInLove} 天</p>
               </div>
             </div>
 
@@ -191,8 +192,8 @@ export default function EndRelationshipScreen() {
 
             <button
               onClick={() => {
-                toast("已撤回申请！");
-                setTimeout(() => navigate("home"), 1000);
+                toast("已撤回申请！", gender);
+                setTimeout(() => navigate("home", gender), 1000);
               }}
               className="btn-jelly btn-jelly-green w-full py-4 text-lg rounded-2xl mt-6"
             >

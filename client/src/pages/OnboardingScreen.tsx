@@ -4,8 +4,8 @@
  * 参考多邻国引导页设计 - 多步骤表单
  * Jelly Pop 弹性美学
  */
-import { useApp } from "@/contexts/AppContext";
-import { MASCOT } from "@/lib/constants";
+import { useApp, Gender } from "@/contexts/AppContext";
+import { MASCOT, THEME } from "@/lib/constants";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { Heart, Calendar, Bell, ChevronRight } from "lucide-react";
@@ -43,7 +43,8 @@ const preferences = [
   { id: "silent", label: "静默接收", desc: "不打扰，自行查看", emoji: "🕊️", color: "#4ECDC4" },
 ];
 
-export default function OnboardingScreen() {
+export default function OnboardingScreen({ gender }: { gender: Gender }) {
+  const t = gender === "female" ? THEME.female : THEME.male;
   const { navigate, toast } = useApp();
   const [step, setStep] = useState(0);
   const [selectedPref, setSelectedPref] = useState("vibrate");
@@ -52,8 +53,8 @@ export default function OnboardingScreen() {
     if (step < steps.length - 1) {
       setStep(step + 1);
     } else {
-      toast("设置完成！");
-      setTimeout(() => navigate("home"), 800);
+      toast("设置完成！", gender);
+      setTimeout(() => navigate("home", gender), 800);
     }
   };
 
@@ -62,7 +63,7 @@ export default function OnboardingScreen() {
   const progress = ((step + 1) / steps.length) * 100;
 
   return (
-    <div className="h-full flex flex-col bg-[#FFFBF5]">
+    <div className="h-full flex flex-col" style={{ background: t.bg }}>
       {/* Progress bar */}
       <div className="px-6 pt-14 pb-2">
         <div className="h-3 bg-[#e8e8e8] rounded-full overflow-hidden">
@@ -77,10 +78,11 @@ export default function OnboardingScreen() {
           <span className="text-[10px] text-[#b0b0b0]">步骤 {step + 1}/{steps.length}</span>
           <button
             onClick={() => {
-              toast("已跳过引导");
-              navigate("home");
+              toast("已跳过引导", gender);
+              navigate("home", gender);
             }}
-            className="text-[10px] text-[#FF6B8A] font-semibold"
+            className="text-[10px] font-semibold"
+            style={{ color: t.primary }}
           >
             跳过
           </button>

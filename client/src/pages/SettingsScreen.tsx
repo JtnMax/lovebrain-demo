@@ -1,7 +1,8 @@
 /*
  * SettingsScreen - 设置页
  */
-import { useApp } from "@/contexts/AppContext";
+import { useApp, Gender } from "@/contexts/AppContext";
+import { THEME } from "@/lib/constants";
 import { motion } from "framer-motion";
 import { ArrowLeft, Bell, Shield, Moon, Globe, Info, ChevronRight } from "lucide-react";
 
@@ -13,14 +14,15 @@ const settings = [
   { icon: Info, label: "关于恋爱脑", desc: "版本 1.0.0", color: "#7f8c8d" },
 ];
 
-export default function SettingsScreen() {
+export default function SettingsScreen({ gender }: { gender: Gender }) {
+  const t = gender === "female" ? THEME.female : THEME.male;
   const { navigate, toast } = useApp();
 
   return (
-    <div className="h-full flex flex-col bg-[#FFFBF5]">
+    <div className="h-full flex flex-col" style={{ background: t.bg }}>
       {/* Header */}
       <div className="flex items-center px-4 pt-12 pb-4">
-        <button onClick={() => navigate("profile")} className="p-2">
+        <button onClick={() => navigate("profile", gender)} className="p-2">
           <ArrowLeft size={24} color="#2C3E50" />
         </button>
         <h2 className="flex-1 text-center text-lg font-bold text-[#2C3E50]">设置</h2>
@@ -59,8 +61,8 @@ export default function SettingsScreen() {
         {/* Logout */}
         <button
           onClick={() => {
-            toast("已退出登录");
-            setTimeout(() => navigate("welcome"), 1000);
+            toast("已退出登录", gender);
+            setTimeout(() => navigate("welcome", gender), 1000);
           }}
           className="w-full mt-6 py-3.5 rounded-2xl border-2 border-[#e74c3c] text-[#e74c3c] font-bold text-sm"
         >

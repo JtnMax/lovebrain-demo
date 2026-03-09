@@ -1,30 +1,31 @@
 /*
  * AnniversaryScreen - 纪念日管理
- * 展示所有纪念日 + 倒计时 + 添加新纪念日
  * Jelly Pop 弹性美学
  */
-import { useApp } from "@/contexts/AppContext";
-import { MOCK_ANNIVERSARIES, MASCOT } from "@/lib/constants";
+import { useApp, Gender } from "@/contexts/AppContext";
+import { MOCK_ANNIVERSARIES, MASCOT, THEME } from "@/lib/constants";
 import { motion } from "framer-motion";
 import { ArrowLeft, Plus, Calendar, Bell, Gift } from "lucide-react";
 
-export default function AnniversaryScreen() {
+export default function AnniversaryScreen({ gender }: { gender: Gender }) {
+  const t = gender === "female" ? THEME.female : THEME.male;
   const { navigate, toast } = useApp();
 
   const upcoming = MOCK_ANNIVERSARIES.filter((a) => !a.isPast);
   const past = MOCK_ANNIVERSARIES.filter((a) => a.isPast);
 
   return (
-    <div className="h-full flex flex-col bg-[#FFFBF5]">
+    <div className="h-full flex flex-col" style={{ background: t.bg }}>
       {/* Header */}
       <div className="flex items-center px-4 pt-12 pb-4">
-        <button onClick={() => navigate("home")} className="p-2">
+        <button onClick={() => navigate("home", gender)} className="p-2">
           <ArrowLeft size={24} color="#2C3E50" />
         </button>
         <h2 className="flex-1 text-center text-lg font-bold text-[#2C3E50]">纪念日</h2>
         <button
-          onClick={() => toast("添加纪念日")}
-          className="w-9 h-9 bg-[#FF6B8A] rounded-full flex items-center justify-center shadow-md shadow-[#FF6B8A]/30"
+          onClick={() => toast("添加纪念日", gender)}
+          className="w-9 h-9 rounded-full flex items-center justify-center shadow-md"
+          style={{ background: t.primary, boxShadow: `0 4px 12px ${t.primary}40` }}
         >
           <Plus size={18} color="white" />
         </button>
@@ -36,7 +37,8 @@ export default function AnniversaryScreen() {
           <motion.div
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="love-card bg-gradient-to-r from-[#FF9A9E] to-[#FECFEF] border-none mb-4 text-center py-6 relative overflow-hidden"
+            className="love-card border-none mb-4 text-center py-6 relative overflow-hidden"
+            style={{ background: `linear-gradient(135deg, ${t.primary}, ${t.accent})` }}
           >
             <div className="absolute top-2 left-4 text-white/20 text-lg">♥</div>
             <div className="absolute bottom-2 right-6 text-white/15 text-2xl">♥</div>
@@ -79,7 +81,7 @@ export default function AnniversaryScreen() {
                   transition={{ delay: 0.1 + i * 0.08 }}
                   className="love-card flex items-center gap-3"
                 >
-                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl bg-[#FFF0F3]">
+                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl" style={{ background: t.primaryLight }}>
                     {ann.emoji}
                   </div>
                   <div className="flex-1">
@@ -122,8 +124,9 @@ export default function AnniversaryScreen() {
                     <span className="text-xs text-[#7f8c8d]">{ann.date}</span>
                   </div>
                   <button
-                    onClick={() => toast("查看回顾")}
-                    className="text-xs text-[#FF6B8A] font-semibold"
+                    onClick={() => toast("查看回顾", gender)}
+                    className="text-xs font-semibold"
+                    style={{ color: t.primary }}
                   >
                     回顾
                   </button>
@@ -138,11 +141,12 @@ export default function AnniversaryScreen() {
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.5 }}
-          onClick={() => toast("创建纪念日")}
-          className="w-full love-card flex items-center gap-3 bg-[#FFF0F3] border-[#FFD4DE] border-dashed border-2"
+          onClick={() => toast("创建纪念日", gender)}
+          className="w-full love-card flex items-center gap-3 border-dashed border-2"
+          style={{ background: t.primaryLight, borderColor: t.accent }}
         >
-          <Plus size={20} color="#FF6B8A" />
-          <span className="text-sm font-semibold text-[#FF6B8A]">添加新的纪念日...</span>
+          <Plus size={20} color={t.primary} />
+          <span className="text-sm font-semibold" style={{ color: t.primary }}>添加新的纪念日...</span>
         </motion.button>
 
         {/* Mascot */}

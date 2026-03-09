@@ -2,12 +2,14 @@
  * LoginScreen - 登录页
  * 参考多邻国登录页：手机号+验证码 + 微信登录 + 协议
  */
-import { useApp } from "@/contexts/AppContext";
+import { useApp, Gender } from "@/contexts/AppContext";
+import { THEME } from "@/lib/constants";
 import { X } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
 
-export default function LoginScreen() {
+export default function LoginScreen({ gender }: { gender: Gender }) {
+  const t = gender === "female" ? THEME.female : THEME.male;
   const { navigate, login, toast } = useApp();
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
@@ -15,18 +17,18 @@ export default function LoginScreen() {
 
   const handleLogin = () => {
     if (!agreed) {
-      toast("请先同意服务条款");
+      toast("请先同意服务条款", gender);
       return;
     }
-    login();
+    login(gender);
   };
 
   const handleGetCode = () => {
     if (!phone) {
-      toast("请输入手机号");
+      toast("请输入手机号", gender);
       return;
     }
-    toast("验证码已发送");
+    toast("验证码已发送", gender);
     setCode("8888");
   };
 
@@ -35,11 +37,12 @@ export default function LoginScreen() {
       initial={{ y: "100%" }}
       animate={{ y: 0 }}
       transition={{ type: "spring", damping: 25, stiffness: 200 }}
-      className="h-full flex flex-col bg-[#FFFBF5]"
+      className="h-full flex flex-col"
+      style={{ background: t.bg }}
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 pt-12 pb-4">
-        <button onClick={() => navigate("welcome")} className="p-2">
+        <button onClick={() => navigate("welcome", gender)} className="p-2">
           <X size={24} color="#2C3E50" />
         </button>
         <h2 className="text-lg font-bold text-[#2C3E50]">输入你的信息</h2>
@@ -49,9 +52,9 @@ export default function LoginScreen() {
       {/* Form */}
       <div className="px-6 mt-4 space-y-3">
         {/* Phone input */}
-        <div className="bg-[#F7F3F0] rounded-2xl overflow-hidden border border-[#f0e6e0]">
-          <div className="flex items-center px-4 py-3.5 border-b border-[#f0e6e0]">
-            <span className="text-[#2C3E50] font-semibold mr-3 pr-3 border-r border-[#e0d8d0]">+86</span>
+        <div className="bg-[#F7F3F0] rounded-2xl overflow-hidden border" style={{ borderColor: t.cardBorder }}>
+          <div className="flex items-center px-4 py-3.5 border-b" style={{ borderColor: t.cardBorder }}>
+            <span className="text-[#2C3E50] font-semibold mr-3 pr-3 border-r" style={{ borderColor: t.cardBorder }}>+86</span>
             <input
               type="tel"
               placeholder="电话号码"
@@ -61,7 +64,8 @@ export default function LoginScreen() {
             />
             <button
               onClick={handleGetCode}
-              className="text-[#FF6B8A] font-semibold text-sm whitespace-nowrap"
+              className="font-semibold text-sm whitespace-nowrap"
+              style={{ color: t.primary }}
             >
               获取验证码
             </button>
@@ -80,10 +84,9 @@ export default function LoginScreen() {
         {/* Login button */}
         <button
           className={`w-full py-4 rounded-2xl text-lg font-bold transition-all ${
-            phone && code
-              ? "btn-jelly btn-jelly-pink"
-              : "bg-[#e8e8e8] text-[#b0b0b0]"
+            phone && code ? "text-white shadow-lg" : "bg-[#e8e8e8] text-[#b0b0b0]"
           }`}
+          style={phone && code ? { background: t.primary, boxShadow: `0 5px 0 ${t.primaryDark}` } : undefined}
           onClick={handleLogin}
         >
           登录
@@ -94,8 +97,9 @@ export default function LoginScreen() {
           <button
             onClick={() => setAgreed(!agreed)}
             className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-all ${
-              agreed ? "bg-[#FF6B8A] border-[#FF6B8A]" : "border-[#d0d0d0] bg-white"
+              !agreed ? "border-[#d0d0d0] bg-white" : ""
             }`}
+            style={agreed ? { background: t.primary, borderColor: t.primary } : undefined}
           >
             {agreed && (
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -104,9 +108,9 @@ export default function LoginScreen() {
             )}
           </button>
           <p className="text-xs text-[#7f8c8d] leading-relaxed">
-            我已阅读并同意<span className="text-[#FF6B8A]">服务条款</span>、
-            <span className="text-[#FF6B8A]">隐私政策</span>，以及
-            <span className="text-[#FF6B8A]">跨境数据传输协议</span>
+            我已阅读并同意<span style={{ color: t.primary }}>服务条款</span>、
+            <span style={{ color: t.primary }}>隐私政策</span>，以及
+            <span style={{ color: t.primary }}>跨境数据传输协议</span>
           </p>
         </div>
       </div>
@@ -117,7 +121,8 @@ export default function LoginScreen() {
       {/* Social login */}
       <div className="px-6 pb-12 space-y-3">
         <button
-          className="btn-jelly btn-jelly-outline w-full py-4 rounded-2xl flex items-center justify-center gap-3"
+          className="w-full py-4 rounded-2xl flex items-center justify-center gap-3 bg-white border-2"
+          style={{ borderColor: t.cardBorder, boxShadow: `0 4px 0 ${t.cardBorder}` }}
           onClick={handleLogin}
         >
           <div className="w-6 h-6 rounded-full bg-[#07C160] flex items-center justify-center">

@@ -1,22 +1,31 @@
 /*
- * Toast - 轻提示组件
+ * Toast - 轻提示组件 (支持双人视角)
  */
-import { useApp } from "@/contexts/AppContext";
+import { useApp, Gender } from "@/contexts/AppContext";
+import { THEME } from "@/lib/constants";
 import { motion, AnimatePresence } from "framer-motion";
 
-export default function Toast() {
-  const { showToast } = useApp();
+export default function Toast({ gender }: { gender?: Gender }) {
+  const { femaleState, maleState, activeGender } = useApp();
+  const g = gender || activeGender;
+  const state = g === "female" ? femaleState : maleState;
+  const theme = g === "female" ? THEME.female : THEME.male;
 
   return (
     <AnimatePresence>
-      {showToast && (
+      {state.showToast && (
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          className="absolute top-12 left-1/2 -translate-x-1/2 z-[60] bg-[#2C3E50] text-white px-5 py-2.5 rounded-full text-sm font-medium shadow-lg"
+          initial={{ y: -40, opacity: 0, scale: 0.9 }}
+          animate={{ y: 0, opacity: 1, scale: 1 }}
+          exit={{ y: -40, opacity: 0, scale: 0.9 }}
+          className="absolute top-14 left-4 right-4 z-[100] text-center"
         >
-          {showToast}
+          <div
+            className="inline-block px-5 py-2.5 rounded-2xl text-white text-sm font-semibold shadow-lg"
+            style={{ background: theme.primary }}
+          >
+            {state.showToast}
+          </div>
         </motion.div>
       )}
     </AnimatePresence>

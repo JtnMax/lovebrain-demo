@@ -1,13 +1,14 @@
 /*
  * WishesScreen - 愿望清单/约定
  */
-import { useApp } from "@/contexts/AppContext";
-import { MOCK_WISHES, MASCOT } from "@/lib/constants";
+import { useApp, Gender } from "@/contexts/AppContext";
+import { MOCK_WISHES, MASCOT, THEME } from "@/lib/constants";
 import { motion } from "framer-motion";
 import { ArrowLeft, Plus, Check } from "lucide-react";
 import { useState } from "react";
 
-export default function WishesScreen() {
+export default function WishesScreen({ gender }: { gender: Gender }) {
+  const t = gender === "female" ? THEME.female : THEME.male;
   const { navigate, toast } = useApp();
   const [wishes, setWishes] = useState(MOCK_WISHES);
 
@@ -22,15 +23,15 @@ export default function WishesScreen() {
   const progress = Math.round((done.length / wishes.length) * 100);
 
   return (
-    <div className="h-full flex flex-col bg-[#FFFBF5]">
+    <div className="h-full flex flex-col" style={{ background: t.bg }}>
       {/* Header */}
       <div className="flex items-center px-4 pt-12 pb-4">
-        <button onClick={() => navigate("profile")} className="p-2">
+        <button onClick={() => navigate("profile", gender)} className="p-2">
           <ArrowLeft size={24} color="#2C3E50" />
         </button>
         <h2 className="flex-1 text-center text-lg font-bold text-[#2C3E50]">愿望清单</h2>
         <button
-          onClick={() => toast("添加愿望")}
+          onClick={() => toast("添加愿望", gender)}
           className="w-9 h-9 bg-[#FF6B35] rounded-full flex items-center justify-center"
         >
           <Plus size={18} color="white" />
@@ -107,7 +108,7 @@ export default function WishesScreen() {
         )}
 
         {/* Mascot */}
-        <div className="love-card bg-[#FFF0F3] border-[#FFD4DE] flex items-center gap-3">
+        <div className="love-card flex items-center gap-3" style={{ background: t.primaryLight, borderColor: t.accent }}>
           <img src={MASCOT.celebrate} alt="" className="w-12 h-12" />
           <p className="text-xs text-[#2C3E50]">
             <span className="font-bold">加油！</span> 一起实现更多甜蜜愿望吧~

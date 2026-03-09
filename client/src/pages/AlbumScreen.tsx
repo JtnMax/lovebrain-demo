@@ -1,7 +1,8 @@
 /*
  * AlbumScreen - 相册列表
  */
-import { useApp } from "@/contexts/AppContext";
+import { useApp, Gender } from "@/contexts/AppContext";
+import { THEME } from "@/lib/constants";
 import { motion } from "framer-motion";
 import { ArrowLeft, Plus, Lock } from "lucide-react";
 
@@ -36,19 +37,20 @@ const albums = [
   },
 ];
 
-export default function AlbumScreen() {
+export default function AlbumScreen({ gender }: { gender: Gender }) {
+  const t = gender === "female" ? THEME.female : THEME.male;
   const { navigate, toast } = useApp();
 
   return (
-    <div className="h-full flex flex-col bg-[#FFFBF5]">
+    <div className="h-full flex flex-col" style={{ background: t.bg }}>
       {/* Header */}
       <div className="flex items-center px-4 pt-12 pb-4">
-        <button onClick={() => navigate("profile")} className="p-2">
+        <button onClick={() => navigate("profile", gender)} className="p-2">
           <ArrowLeft size={24} color="#2C3E50" />
         </button>
         <h2 className="flex-1 text-center text-lg font-bold text-[#2C3E50]">相册</h2>
         <button
-          onClick={() => toast("创建相册")}
+          onClick={() => toast("创建相册", gender)}
           className="w-9 h-9 bg-[#4ECDC4] rounded-full flex items-center justify-center"
         >
           <Plus size={18} color="white" />
@@ -63,7 +65,7 @@ export default function AlbumScreen() {
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: i * 0.1 }}
-              onClick={() => toast("查看相册详情")}
+              onClick={() => toast("查看相册详情", gender)}
               className="love-card p-0 overflow-hidden text-left"
             >
               <div className="aspect-square relative">

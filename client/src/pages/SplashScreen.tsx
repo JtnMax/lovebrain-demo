@@ -3,8 +3,8 @@
  * Jelly Pop 弹性美学 - 吉祥物居中 + APP名称 + 标语 + 心形粒子
  * 参考多邻国启动页设计
  */
-import { useApp } from "@/contexts/AppContext";
-import { MASCOT, APP_NAME, APP_SLOGAN } from "@/lib/constants";
+import { useApp, Gender } from "@/contexts/AppContext";
+import { MASCOT, APP_NAME, APP_SLOGAN, THEME } from "@/lib/constants";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
@@ -22,17 +22,18 @@ function HeartParticle({ delay, x, size }: { delay: number; x: number; size: num
   );
 }
 
-export default function SplashScreen() {
+export default function SplashScreen({ gender }: { gender: Gender }) {
   const { navigate } = useApp();
+  const t = gender === "female" ? THEME.female : THEME.male;
   const [showContent, setShowContent] = useState(false);
 
   useEffect(() => {
     setShowContent(true);
     const timer = setTimeout(() => {
-      navigate("welcome");
+      navigate("welcome", gender);
     }, 3000);
     return () => clearTimeout(timer);
-  }, [navigate]);
+  }, [navigate, gender]);
 
   const particles = Array.from({ length: 12 }, (_, i) => ({
     delay: i * 0.3,
@@ -41,7 +42,7 @@ export default function SplashScreen() {
   }));
 
   return (
-    <div className="h-full flex flex-col items-center justify-center bg-gradient-to-b from-[#FFF0F3] to-[#FFFBF5] px-8 relative overflow-hidden">
+    <div className={`h-full flex flex-col items-center justify-center bg-gradient-to-b ${t.gradientBg} px-8 relative overflow-hidden`}>
       {/* Heart particles */}
       {particles.map((p, i) => (
         <HeartParticle key={i} {...p} />
@@ -78,8 +79,8 @@ export default function SplashScreen() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
-        className="text-4xl font-black text-[#FF6B8A] mb-2 relative z-10"
-        style={{ fontFamily: "'Nunito', 'Noto Sans SC', sans-serif" }}
+        className="text-4xl font-black mb-2 relative z-10"
+        style={{ fontFamily: "'Nunito', 'Noto Sans SC', sans-serif", color: t.primary }}
       >
         {APP_NAME}
       </motion.h1>
@@ -105,7 +106,7 @@ export default function SplashScreen() {
           <motion.div
             key={i}
             className="w-3 h-3 rounded-full"
-            style={{ background: ["#FF6B8A", "#4ECDC4", "#FFC800"][i] }}
+            style={{ background: [t.primary, "#4ECDC4", "#FFC800"][i] }}
             animate={{ scale: [1, 1.4, 1], opacity: [0.4, 1, 0.4] }}
             transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.2 }}
           />

@@ -3,8 +3,8 @@
  * 参考多邻国首页：吉祥物 + 马上开始 + 已有账户
  * Jelly Pop 弹性美学
  */
-import { useApp } from "@/contexts/AppContext";
-import { MASCOT, APP_NAME, APP_SLOGAN } from "@/lib/constants";
+import { useApp, Gender } from "@/contexts/AppContext";
+import { MASCOT, APP_NAME, APP_SLOGAN, THEME } from "@/lib/constants";
 import { motion } from "framer-motion";
 
 function FloatingHeart({ delay, x, y, size }: { delay: number; x: string; y: string; size: number }) {
@@ -20,11 +20,12 @@ function FloatingHeart({ delay, x, y, size }: { delay: number; x: string; y: str
   );
 }
 
-export default function WelcomeScreen() {
+export default function WelcomeScreen({ gender }: { gender: Gender }) {
+  const t = gender === "female" ? THEME.female : THEME.male;
   const { navigate } = useApp();
 
   return (
-    <div className="h-full flex flex-col bg-gradient-to-b from-[#FFF0F3] via-[#FFFBF5] to-[#FFFBF5] relative overflow-hidden">
+    <div className={`h-full flex flex-col bg-gradient-to-b ${t.gradientBg} relative overflow-hidden`}>
       {/* Floating hearts background */}
       <FloatingHeart delay={0} x="10%" y="15%" size={20} />
       <FloatingHeart delay={0.5} x="80%" y="10%" size={14} />
@@ -68,8 +69,8 @@ export default function WelcomeScreen() {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="text-4xl font-black text-[#FF6B8A] mb-2"
-          style={{ fontFamily: "'Nunito', 'Noto Sans SC', sans-serif" }}
+          className="text-4xl font-black mb-2"
+          style={{ fontFamily: "'Nunito', 'Noto Sans SC', sans-serif", color: t.primary }}
         >
           {APP_NAME}
         </motion.h1>
@@ -113,13 +114,13 @@ export default function WelcomeScreen() {
       >
         <button
           className="btn-jelly btn-jelly-green w-full py-4 text-lg rounded-2xl"
-          onClick={() => navigate("login")}
+          onClick={() => navigate("login", gender)}
         >
           马上开始
         </button>
         <button
           className="btn-jelly btn-jelly-outline w-full py-4 text-lg rounded-2xl"
-          onClick={() => navigate("login")}
+          onClick={() => navigate("login", gender)}
         >
           已有账户
         </button>

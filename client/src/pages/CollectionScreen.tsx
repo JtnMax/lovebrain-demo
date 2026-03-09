@@ -3,8 +3,8 @@
  * 混排展示照片/笔记/语音等收藏内容
  * Jelly Pop 弹性美学
  */
-import { useApp } from "@/contexts/AppContext";
-import { MOCK_COLLECTIONS, MASCOT } from "@/lib/constants";
+import { useApp, Gender } from "@/contexts/AppContext";
+import { MOCK_COLLECTIONS, MASCOT, THEME } from "@/lib/constants";
 import { motion } from "framer-motion";
 import TabBar from "@/components/TabBar";
 import { Image, FileText, Mic, Play } from "lucide-react";
@@ -16,7 +16,8 @@ const filterColors: Record<string, string> = {
   "全部": "#FF6B8A", "照片": "#4ECDC4", "笔记": "#FFC800", "语音": "#58CC02"
 };
 
-export default function CollectionScreen() {
+export default function CollectionScreen({ gender }: { gender: Gender }) {
+  const t = gender === "female" ? THEME.female : THEME.male;
   const { toast } = useApp();
   const [activeFilter, setActiveFilter] = useState("全部");
 
@@ -25,13 +26,13 @@ export default function CollectionScreen() {
     : MOCK_COLLECTIONS.filter((c) => c.type === filterMap[activeFilter]);
 
   return (
-    <div className="h-full flex flex-col bg-[#FFFBF5] relative">
+    <div className="h-full flex flex-col relative" style={{ background: t.bg }}>
       {/* Header */}
-      <div className="bg-[#FFFBF5] px-4 pt-12 pb-3 flex items-center justify-between">
+      <div className=" px-4 pt-12 pb-3 flex items-center justify-between">
         <h1 className="text-2xl font-black text-[#2C3E50]">收藏馆</h1>
-        <div className="flex items-center gap-1 bg-[#FFF0F3] px-3 py-1 rounded-full">
+        <div className="flex items-center gap-1 px-3 py-1 rounded-full" style={{ background: t.primaryLight }}>
           <span className="text-sm">💝</span>
-          <span className="text-xs font-bold text-[#FF6B8A]">{MOCK_COLLECTIONS.length}</span>
+          <span className="text-xs font-bold" style={{ color: t.primary }}>{MOCK_COLLECTIONS.length}</span>
         </div>
       </div>
 
@@ -63,7 +64,7 @@ export default function CollectionScreen() {
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: i * 0.08 }}
               className="love-card overflow-hidden p-0 active:scale-[0.98] transition-transform"
-              onClick={() => toast("查看详情")}
+              onClick={() => toast("查看详情", gender)}
             >
               {item.type === "photo" && item.thumbnail && (
                 <div className="aspect-square relative">
@@ -134,7 +135,7 @@ export default function CollectionScreen() {
         </motion.div>
       </div>
 
-      <TabBar />
+      <TabBar gender={gender} />
     </div>
   );
 }
