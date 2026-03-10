@@ -56,9 +56,9 @@ function FlowPanel() {
       title: "D. 即时通信",
       color: "#FFC800",
       screens: [
-        { id: "chat", label: "聊天", emoji: "💬" },
-        { id: "topic-cards", label: "找话题", emoji: "🎴" },
-      ],
+      { id: "chat", label: "💬 聊天", emoji: "💬" },
+        { id: "topic-cards", label: "🎴 话题", emoji: "🎴" },
+        { id: "private-photo", label: "🔒 私密图片", emoji: "🔒" },      ],
     },
     {
       title: "E. 纪念日",
@@ -173,7 +173,8 @@ function MobileFlowBar() {
     { id: "login", label: "🔐 登录" },
     { id: "home", label: "🏠 首页" },
     { id: "signal-send", label: "💌 信号" },
-    { id: "chat", label: "💬 聊天" },
+        { id: "chat", label: "💬 聊天" },
+    { id: "private-photo", label: "🔒 私密图" },
     { id: "cosmos-letter", label: "🌌 宇宙来信" },
     { id: "travel-map", label: "🗺️ 旅行" },
     { id: "topic-cards", label: "🎴 话题" },

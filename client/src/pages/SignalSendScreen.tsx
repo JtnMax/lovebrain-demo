@@ -64,10 +64,14 @@ export default function SignalSendScreen({ gender }: { gender: Gender }) {
     });
 
     setSent(true);
-    // AppContext.sendSignal now handles navigating sender to home and receiver to signal-receive
+    // 发送成功后展示 2.5s 庆祝动画，然后自动返回首页
+    // AppContext.sendSignal 已处理接收方自动跳转到 signal-receive
+    // 这里只需处理发送方的后续提示
     setTimeout(() => {
-      toast("关心信号已送达！", gender);
+      toast("💌 关心已送达！", gender);
     }, 1500);
+    // AppContext.sendSignal 内部已在 300ms 后自动导航发送方回首页
+    // 无需在此重复调用 navigate，避免二次跳转
   };
 
   return (

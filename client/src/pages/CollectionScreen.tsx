@@ -12,8 +12,12 @@ import { useState } from "react";
 
 const filters = ["全部", "照片", "笔记", "语音"];
 const filterMap: Record<string, string> = { "照片": "photo", "笔记": "note", "语音": "voice" };
+// 使用语义化颜色而非硬编码，与 THEME 保持一致
 const filterColors: Record<string, string> = {
-  "全部": "#FF6B8A", "照片": "#4ECDC4", "笔记": "#FFC800", "语音": "#58CC02"
+  "全部": "#FF6B8A", // 收藏馆主色（女性主色）
+  "照片": "#4ECDC4",  // 功能色 - 照片
+  "笔记": "#FFC800",  // 功能色 - 笔记
+  "语音": "#58CC02",  // 功能色 - 语音
 };
 
 export default function CollectionScreen({ gender }: { gender: Gender }) {

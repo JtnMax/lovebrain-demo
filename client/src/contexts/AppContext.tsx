@@ -87,7 +87,7 @@ export interface ChatMessage {
   sender: "female" | "male";
   text: string;
   time: string;
-  type: "text" | "image" | "signal" | "topic";
+  type: "text" | "image" | "signal" | "topic" | "private-photo";
 }
 
 const AppContext = createContext<AppContextType | null>(null);

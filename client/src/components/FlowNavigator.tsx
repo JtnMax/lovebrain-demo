@@ -26,6 +26,7 @@ import LoadingScreen from "@/pages/LoadingScreen";
 import CosmosLetterScreen from "@/pages/CosmosLetterScreen";
 import TravelMapScreen from "@/pages/TravelMapScreen";
 import TopicCardsScreen from "@/pages/TopicCardsScreen";
+import PrivatePhotoScreen from "@/pages/PrivatePhotoScreen";
 
 const screenMap: Record<string, React.ComponentType<{ gender: Gender }>> = {
   splash: SplashScreen,
@@ -56,6 +57,7 @@ const screenMap: Record<string, React.ComponentType<{ gender: Gender }>> = {
   "cosmos-letter": CosmosLetterScreen,
   "travel-map": TravelMapScreen,
   "topic-cards": TopicCardsScreen,
+  "private-photo": PrivatePhotoScreen,
 };
 
 export default function FlowNavigator({ gender }: { gender?: Gender }) {
