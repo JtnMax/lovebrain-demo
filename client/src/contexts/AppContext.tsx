@@ -66,7 +66,7 @@ interface AppContextType {
   setViewMode: (m: "dual" | "single") => void;
   // Signal events (shared between phones)
   signals: SignalEvent[];
-  sendSignal: (signal: Omit<SignalEvent, "id" | "timestamp" | "status">) => void;
+  sendSignal: (signal: Omit<SignalEvent, "id" | "timestamp" | "status">, options?: { skipSenderNavigation?: boolean }) => void;
   markSignalRead: (id: string) => void;
   // Navigation per phone
   navigate: (screen: Screen, gender?: Gender) => void;
@@ -176,7 +176,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }, 2000);
   }, [activeGender]);
 
-  const sendSignal = useCallback((signal: Omit<SignalEvent, "id" | "timestamp" | "status">) => {
+  const sendSignal = useCallback((signal: Omit<SignalEvent, "id" | "timestamp" | "status">, options?: { skipSenderNavigation?: boolean }) => {
     const newSignal: SignalEvent = {
       ...signal,
       id: `sig_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
@@ -189,14 +189,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const receiverSet = signal.to === "female" ? setFemaleState : setMaleState;
     const senderSet = signal.from === "female" ? setFemaleState : setMaleState;
 
-    // Navigate sender back to home
-    setTimeout(() => {
-      senderSet((prev) => ({
-        ...prev,
-        previousScreen: prev.currentScreen,
-        currentScreen: "home",
-      }));
-    }, 300);
+    // Navigate sender back to home (unless called from home directly)
+    if (!options?.skipSenderNavigation) {
+      setTimeout(() => {
+        senderSet((prev) => ({
+          ...prev,
+          previousScreen: prev.currentScreen,
+          currentScreen: "home",
+        }));
+      }, 300);
+    }
 
     // Simulate delivery + navigate receiver to signal-receive
     setTimeout(() => {
