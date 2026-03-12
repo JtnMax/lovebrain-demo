@@ -54,6 +54,12 @@ interface PhoneState {
   showToast: string | null;
 }
 
+// User status (emoji + label) shared between both phones
+export interface UserStatus {
+  emoji: string;
+  label: string;
+}
+
 interface AppContextType {
   // Dual phone states
   femaleState: PhoneState;
@@ -75,6 +81,9 @@ interface AppContextType {
   login: (gender?: Gender) => void;
   bind: (gender?: Gender) => void;
   toast: (message: string, gender?: Gender) => void;
+  // User statuses (shared between phones)
+  userStatuses: { female: UserStatus | null; male: UserStatus | null };
+  setUserStatus: (gender: Gender, status: UserStatus | null) => void;
   // Chat messages (shared)
   chatMessages: ChatMessage[];
   addChatMessage: (msg: Omit<ChatMessage, "id" | "time">) => void;
@@ -107,6 +116,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [activeGender, setActiveGender] = useState<Gender>("female");
   const [viewMode, setViewMode] = useState<"dual" | "single">("dual");
   const [signals, setSignals] = useState<SignalEvent[]>([]);
+  const [userStatuses, setUserStatuses] = useState<{ female: UserStatus | null; male: UserStatus | null }>({
+    female: null,
+    male: null,
+  });
+
+  const setUserStatus = useCallback((gender: Gender, status: UserStatus | null) => {
+    setUserStatuses((prev) => ({ ...prev, [gender]: status }));
+  }, []);
+
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     { id: 1, sender: "female", text: "今天天气真好，想出去走走", time: "09:30", type: "text" },
     { id: 2, sender: "male", text: "好呀！去哪里？", time: "09:31", type: "text" },
@@ -259,6 +277,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         login,
         bind,
         toast,
+        userStatuses,
+        setUserStatus,
         chatMessages,
         addChatMessage,
         currentState,

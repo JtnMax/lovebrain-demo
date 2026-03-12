@@ -1,10 +1,10 @@
 /*
- * HomeScreen - 首页（全面重构版）
- * - 顶部：成就卡片（桃心/火苗点击展示）、回执偏好快速切换
- * - 伴侣卡：中国人头像、状态设置
+ * HomeScreen - 首页
+ * - 顶部：成就卡片（桃心/火苗）、回执偏好快速切换
+ * - 伴侣卡：显示对方头像+名称+对方状态，以及设置自己的状态
  * - 关心信号区：戳一下大按钮 + 快捷信号 + 自定义信号
  * - 历史信号：近5条 + 详情弹窗
- * - 更多功能扩展面板（多邻国风格）
+ * - 更多功能扩展面板
  * - 宇宙来信入口
  * - 纪念日提醒
  */
@@ -19,28 +19,28 @@ import {
 } from "lucide-react";
 import { useState, useRef } from "react";
 
-/* ─── 用户头像 ─── */
-const USER_AVATARS = {
+/* ─── 用户头像（用户上传的真实头像） ─── */
+const USER_AVATARS: Record<Gender, string> = {
   female: "/avatars/female_avatar.png",
   male:   "/avatars/male_avatar.png",
 };
 
 /* ─── 回执偏好模式 ─── */
 const NOTIFY_MODES = [
-  { id: "normal",  icon: Volume2,  emoji: "🔔", label: "常规", color: "#FF6B8A" },
-  { id: "private", icon: EyeOff,   emoji: "🔒", label: "隐私", color: "#4A90D9" },
-  { id: "dnd",     icon: MoonStar, emoji: "🌙", label: "勿扰", color: "#B8A9C9" },
+  { id: "normal",  icon: Volume2,  label: "常规", color: "#FF6B8A" },
+  { id: "private", icon: EyeOff,   label: "隐私", color: "#4A90D9" },
+  { id: "dnd",     icon: MoonStar, label: "勿扰", color: "#B8A9C9" },
 ] as const;
 
 /* ─── 更多功能模块 ─── */
 const MORE_MODULES = [
-  { id: "chat",        icon: MessageCircle, label: "聊天",   screen: "chat"        as const, color: "#4A90D9", bg: "#EBF3FC" },
-  { id: "collection",  icon: Star,          label: "收藏",   screen: "collection"  as const, color: "#FFC800", bg: "#FFFBEA" },
-  { id: "anniversary", icon: Heart,         label: "纪念日", screen: "anniversary" as const, color: "#FF6B8A", bg: "#FFF0F3" },
-  { id: "album",       icon: Image,         label: "相册",   screen: "album"       as const, color: "#4ECDC4", bg: "#E8FFFC" },
-  { id: "wishes",      icon: Gift,          label: "愿望",   screen: "wishes"      as const, color: "#FF6B35", bg: "#FFF4EE" },
-  { id: "diary",       icon: BookOpen,      label: "日记",   screen: "diary-create" as const, color: "#58CC02", bg: "#F0FFF0" },
-  { id: "timeline",    icon: Clock,         label: "历程",   screen: "timeline"    as const, color: "#B8A9C9", bg: "#F5F0FF" },
+  { id: "chat",        icon: MessageCircle, label: "聊天",   screen: "chat"          as const, color: "#4A90D9", bg: "#EBF3FC" },
+  { id: "collection",  icon: Star,          label: "收藏",   screen: "collection"    as const, color: "#FFC800", bg: "#FFFBEA" },
+  { id: "anniversary", icon: Heart,         label: "纪念日", screen: "anniversary"   as const, color: "#FF6B8A", bg: "#FFF0F3" },
+  { id: "album",       icon: Image,         label: "相册",   screen: "album"         as const, color: "#4ECDC4", bg: "#E8FFFC" },
+  { id: "wishes",      icon: Gift,          label: "愿望",   screen: "wishes"        as const, color: "#FF6B35", bg: "#FFF4EE" },
+  { id: "diary",       icon: BookOpen,      label: "日记",   screen: "diary-create"  as const, color: "#58CC02", bg: "#F0FFF0" },
+  { id: "timeline",    icon: Clock,         label: "历程",   screen: "timeline"      as const, color: "#B8A9C9", bg: "#F5F0FF" },
   { id: "cosmos",      icon: Sparkles,      label: "星座",   screen: "cosmos-letter" as const, color: "#FFC800", bg: "#FFFBEA" },
 ];
 
@@ -85,21 +85,14 @@ function AchievementCard({
         >
           {type === "days" ? "💕" : "🔥"}
         </motion.div>
-        <p className="text-white/80 text-sm font-semibold mb-1">
-          {type === "days" ? "在一起" : "连续互动"}
-        </p>
+        <p className="text-white/80 text-sm font-semibold mb-1">{type === "days" ? "在一起" : "连续互动"}</p>
         <p className="text-white font-black text-4xl mb-1">{value}</p>
         <p className="text-white/80 text-sm">天</p>
-        {type === "days" && (
-          <div className="mt-3 bg-white/20 rounded-2xl px-4 py-2">
-            <p className="text-white text-xs">🎉 每一天都是甜蜜的记录</p>
-          </div>
-        )}
-        {type === "streak" && (
-          <div className="mt-3 bg-white/20 rounded-2xl px-4 py-2">
-            <p className="text-white text-xs">⚡ 你们的心意相通指数 MAX！</p>
-          </div>
-        )}
+        <div className="mt-3 bg-white/20 rounded-2xl px-4 py-2">
+          <p className="text-white text-xs">
+            {type === "days" ? "🎉 每一天都是甜蜜的记录" : "⚡ 你们的心意相通指数 MAX！"}
+          </p>
+        </div>
       </div>
     </motion.div>
   );
@@ -111,14 +104,10 @@ function SignalStatus({ signal, myGender, t }: { signal?: SignalEvent; myGender:
   const partnerColor = myGender === "female" ? THEME.male.primary : THEME.female.primary;
   const isRead = signal.status === "read";
   const isDelivered = signal.status === "delivered" || isRead;
-
   return (
     <div className="flex items-center gap-0.5">
-      {/* 发送方桃心 */}
       <Heart size={10} fill={t.primary} color={t.primary} />
-      {/* 闪电连线 */}
       <Zap size={10} color={isDelivered ? "#FFC800" : "#e0e0e0"} fill={isDelivered ? "#FFC800" : "none"} />
-      {/* 接收方桃心 */}
       <Heart size={10} fill={isRead ? partnerColor : "none"} color={isRead ? partnerColor : "#e0e0e0"} />
     </div>
   );
@@ -198,17 +187,16 @@ function SignalDetailModal({
 
 /* ═══════════════════════════════════════════════════════ */
 export default function HomeScreen({ gender }: { gender: Gender }) {
-  const { navigate, toast, signals, sendSignal, addChatMessage } = useApp();
+  const { navigate, toast, signals, sendSignal, userStatuses, setUserStatus } = useApp();
   const t = gender === "female" ? THEME.female : THEME.male;
   const me = gender === "female" ? USERS.female : USERS.male;
   const partner = gender === "female" ? USERS.male : USERS.female;
-  const targetGender: Gender = gender === "female" ? "male" : "female";
+  const partnerGender: Gender = gender === "female" ? "male" : "female";
 
   /* ── 状态 ── */
   const [achievementType, setAchievementType] = useState<"days" | "streak" | null>(null);
   const [notifyMode, setNotifyMode] = useState<"normal" | "private" | "dnd">("normal");
   const [showMorePanel, setShowMorePanel] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [showStatusPicker, setShowStatusPicker] = useState(false);
   const [selectedSignal, setSelectedSignal] = useState<SignalEvent | null>(null);
   const [customText, setCustomText] = useState("");
@@ -217,9 +205,14 @@ export default function HomeScreen({ gender }: { gender: Gender }) {
   const pokeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [showTabEdit, setShowTabEdit] = useState(false);
 
+  /* ── 当前用户自己的状态 ── */
+  const myStatus = userStatuses[gender];
+  /* ── 对方的状态 ── */
+  const partnerStatus = userStatuses[partnerGender];
+
   /* ── 近5条对方发来的信号 ── */
   const recentSignals = signals
-    .filter((s) => s.from === targetGender)
+    .filter((s) => s.from === partnerGender)
     .sort((a, b) => b.timestamp - a.timestamp)
     .slice(0, 5);
 
@@ -227,21 +220,21 @@ export default function HomeScreen({ gender }: { gender: Gender }) {
   const handlePoke = () => {
     const newCount = pokeCount + 1;
     setPokeCount(newCount);
-    sendSignal({ from: gender, to: targetGender, type: "poke", emoji: "👆", text: newCount >= 3 ? "疯狂戳你！！！" : "戳一下" }, { skipSenderNavigation: true });
+    sendSignal({ from: gender, to: partnerGender, type: "poke", emoji: "👆", text: newCount >= 3 ? "疯狂戳你！！！" : "戳一下" }, { skipSenderNavigation: true });
     if (pokeTimer.current) clearTimeout(pokeTimer.current);
     pokeTimer.current = setTimeout(() => setPokeCount(0), 3000);
   };
 
   /* ── 快捷信号发送 ── */
   const handleQuickSignal = (signal: typeof CARE_SIGNALS[0]) => {
-    sendSignal({ from: gender, to: targetGender, type: "care", emoji: signal.emoji, text: signal.text }, { skipSenderNavigation: true });
+    sendSignal({ from: gender, to: partnerGender, type: "care", emoji: signal.emoji, text: signal.text }, { skipSenderNavigation: true });
     toast(`${signal.emoji} 已发送「${signal.text}」`, gender);
   };
 
   /* ── 自定义信号发送 ── */
   const handleCustomSend = () => {
     if (!customText.trim()) return;
-    sendSignal({ from: gender, to: targetGender, type: "custom", emoji: "💌", text: customText }, { skipSenderNavigation: true });
+    sendSignal({ from: gender, to: partnerGender, type: "custom", emoji: "💌", text: customText }, { skipSenderNavigation: true });
     toast("💌 自定义信号已发送", gender);
     setCustomText("");
     setShowCustomInput(false);
@@ -253,8 +246,6 @@ export default function HomeScreen({ gender }: { gender: Gender }) {
     const labels = { normal: "🔔 常规模式已开启", private: "🔒 隐私模式已开启", dnd: "🌙 勿扰模式已开启" };
     toast(labels[mode], gender);
   };
-
-  const currentNotify = NOTIFY_MODES.find((m) => m.id === notifyMode)!;
 
   return (
     <div className="h-full flex flex-col relative overflow-hidden" style={{ background: t.bg }}>
@@ -308,7 +299,7 @@ export default function HomeScreen({ gender }: { gender: Gender }) {
             <span className="font-black text-sm text-[#FF6B35]">7</span>
           </button>
 
-          {/* 更多功能入口（多邻国风格） */}
+          {/* 更多功能入口 */}
           <button
             onClick={() => setShowMorePanel(!showMorePanel)}
             className="flex items-center gap-1 px-3 py-1.5 rounded-full transition-all"
@@ -360,17 +351,14 @@ export default function HomeScreen({ gender }: { gender: Gender }) {
                       onClick={() => { navigate(mod.screen, gender); setShowMorePanel(false); }}
                       className="flex-shrink-0 flex flex-col items-center gap-1 w-16"
                     >
-                      <div
-                        className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm"
-                        style={{ background: mod.bg }}
-                      >
+                      <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm" style={{ background: mod.bg }}>
                         <ModIcon size={22} color={mod.color} />
                       </div>
                       <span className="text-[10px] font-semibold text-[#7f8c8d]">{mod.label}</span>
                     </motion.button>
                   );
                 })}
-                {/* 编辑导航栏按钮（虚线框+工字钉） */}
+                {/* 编辑导航栏 */}
                 <motion.button
                   initial={{ scale: 0, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
@@ -392,70 +380,123 @@ export default function HomeScreen({ gender }: { gender: Gender }) {
       {/* ── 可滚动内容区 ── */}
       <div className="flex-1 overflow-y-auto pb-24 px-4 space-y-3">
 
-        {/* 伴侣卡 */}
+        {/* ══ 伴侣卡：显示对方头像+名称+对方状态，以及设置自己的状态 ══ */}
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="love-card flex items-center gap-4"
+          className="love-card"
         >
-          <div className="relative">
+          {/* 上半部分：对方信息 */}
+          <div className="flex items-center gap-4 mb-3">
+            {/* 对方头像 */}
+            <div className="relative">
+              <img
+                src={USER_AVATARS[partnerGender]}
+                alt={partner.name}
+                className="w-14 h-14 rounded-full object-cover border-3"
+                style={{ borderColor: t.primary }}
+              />
+              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-[#58CC02] rounded-full border-2 border-white flex items-center justify-center">
+                <motion.div className="w-2 h-2 rounded-full bg-white" animate={{ scale: [1, 0.5, 1] }} transition={{ duration: 2, repeat: Infinity }} />
+              </div>
+            </div>
+
+            {/* 对方名称 + 对方状态 */}
+            <div className="flex-1">
+              <p className="font-bold text-[#2C3E50]">{partner.name}</p>
+              <p className="text-xs text-[#7f8c8d]">
+                在一起第 <span className="font-black" style={{ color: t.primary }}>{COUPLE_INFO.daysInLove}</span> 天
+              </p>
+              {/* 对方当前状态 */}
+              {partnerStatus ? (
+                <motion.div
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold"
+                  style={{ background: `${t.primary}15`, color: t.primary }}
+                >
+                  <span>{partnerStatus.emoji}</span>
+                  <span>TA 现在：{partnerStatus.label}</span>
+                </motion.div>
+              ) : (
+                <p className="text-[10px] text-[#b0b0b0] mt-1">TA 还没有设置状态</p>
+              )}
+            </div>
+          </div>
+
+          {/* 分隔线 */}
+          <div className="border-t border-dashed mb-3" style={{ borderColor: t.cardBorder }} />
+
+          {/* 下半部分：我的状态 */}
+          <div className="flex items-center gap-3">
+            {/* 我的头像（小） */}
             <img
               src={USER_AVATARS[gender]}
               alt={me.name}
-              className="w-14 h-14 rounded-full object-cover border-3"
-              style={{ borderColor: t.primary }}
+              className="w-9 h-9 rounded-full object-cover border-2"
+              style={{ borderColor: t.cardBorder }}
             />
-            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-[#58CC02] rounded-full border-2 border-white flex items-center justify-center">
-              <motion.div className="w-2 h-2 rounded-full bg-white" animate={{ scale: [1, 0.5, 1] }} transition={{ duration: 2, repeat: Infinity }} />
+            <div className="flex-1">
+              <p className="text-xs text-[#7f8c8d] font-medium">我的状态</p>
+              {myStatus ? (
+                <p className="text-sm font-bold text-[#2C3E50]">{myStatus.emoji} {myStatus.label}</p>
+              ) : (
+                <p className="text-xs text-[#b0b0b0]">还没设置，让 TA 知道你在做什么</p>
+              )}
             </div>
-          </div>
-          <div className="flex-1">
-            <p className="font-bold text-[#2C3E50]">{partner.name}</p>
-            <p className="text-xs text-[#7f8c8d]">
-              在一起第 <span className="font-black" style={{ color: t.primary }}>{COUPLE_INFO.daysInLove}</span> 天
-            </p>
-          </div>
-          {/* 我的状态 */}
-          <button
-            onClick={() => setShowStatusPicker(!showStatusPicker)}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-full border text-xs font-semibold"
-            style={{ borderColor: t.cardBorder, background: t.primaryLight, color: t.primary }}
-          >
-            {selectedStatus ? <span>{selectedStatus}</span> : <span>设置状态</span>}
-          </button>
-        </motion.div>
-
-        {/* 状态选择器 */}
-        <AnimatePresence>
-          {showStatusPicker && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="overflow-hidden"
+            <button
+              onClick={() => setShowStatusPicker(!showStatusPicker)}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-full border text-xs font-semibold active:scale-95 transition-transform"
+              style={{ borderColor: t.primary, background: t.primaryLight, color: t.primary }}
             >
-              <div className="love-card">
-                <p className="text-xs font-bold text-[#7f8c8d] mb-2">选择你的状态</p>
-                <div className="grid grid-cols-4 gap-2">
-                  {STATUS_OPTIONS.map((s) => (
+              {myStatus ? "修改" : "设置"}
+            </button>
+          </div>
+
+          {/* 状态选择器 */}
+          <AnimatePresence>
+            {showStatusPicker && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="mt-3 pt-3 border-t" style={{ borderColor: t.cardBorder }}>
+                  <p className="text-xs font-bold text-[#7f8c8d] mb-2">选择你现在的状态</p>
+                  <div className="grid grid-cols-4 gap-2">
+                    {STATUS_OPTIONS.map((s) => (
+                      <button
+                        key={s.label}
+                        onClick={() => {
+                          setUserStatus(gender, { emoji: s.emoji, label: s.label });
+                          setShowStatusPicker(false);
+                          toast(`状态已更新：${s.emoji} ${s.label}`, gender);
+                        }}
+                        className="flex flex-col items-center gap-1 p-2 rounded-xl active:scale-95 transition-transform"
+                        style={{
+                          background: myStatus?.label === s.label ? t.primaryLight : "#f5f5f5",
+                          border: myStatus?.label === s.label ? `1.5px solid ${t.primary}` : "1.5px solid transparent",
+                        }}
+                      >
+                        <span className="text-xl">{s.emoji}</span>
+                        <span className="text-[10px] text-[#7f8c8d]">{s.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                  {myStatus && (
                     <button
-                      key={s.label}
-                      onClick={() => {
-                        setSelectedStatus(`${s.emoji} ${s.label}`);
-                        setShowStatusPicker(false);
-                        toast(`状态已更新：${s.emoji} ${s.label}`, gender);
-                      }}
-                      className="flex flex-col items-center gap-1 p-2 rounded-xl hover:bg-[#f5f5f5] transition-colors"
+                      onClick={() => { setUserStatus(gender, null); setShowStatusPicker(false); toast("状态已清除", gender); }}
+                      className="mt-2 w-full text-xs text-[#b0b0b0] py-1.5 rounded-xl bg-[#f5f5f5]"
                     >
-                      <span className="text-xl">{s.emoji}</span>
-                      <span className="text-[10px] text-[#7f8c8d]">{s.label}</span>
+                      清除状态
                     </button>
-                  ))}
+                  )}
                 </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
 
         {/* ══ 关心信号区 ══ */}
         <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }} className="love-card space-y-4">
@@ -493,9 +534,7 @@ export default function HomeScreen({ gender }: { gender: Gender }) {
               {pokeCount >= 3 ? "💥" : "👆"}
             </motion.span>
             <div className="text-left">
-              <p className="text-white font-black text-base">
-                {pokeCount >= 3 ? "疯狂戳！！！" : "戳一下 TA"}
-              </p>
+              <p className="text-white font-black text-base">{pokeCount >= 3 ? "疯狂戳！！！" : "戳一下 TA"}</p>
               <p className="text-white/80 text-xs">点一次 TA 就收到一次信号</p>
             </div>
             {pokeCount > 0 && (
@@ -565,13 +604,12 @@ export default function HomeScreen({ gender }: { gender: Gender }) {
                       <Send size={16} color="white" />
                     </button>
                   </div>
-                  {/* 媒体附件按钮 */}
                   <div className="flex gap-2">
                     {[
-                      { icon: Image, label: "图片", emoji: "🖼️" },
-                      { icon: Mic,   label: "语音", emoji: "🎤" },
-                      { icon: MapPin,label: "位置", emoji: "📍" },
-                      { icon: Smile, label: "表情", emoji: "😊" },
+                      { label: "图片", emoji: "🖼️" },
+                      { label: "语音", emoji: "🎤" },
+                      { label: "位置", emoji: "📍" },
+                      { label: "表情", emoji: "😊" },
                     ].map((btn) => (
                       <button
                         key={btn.label}
