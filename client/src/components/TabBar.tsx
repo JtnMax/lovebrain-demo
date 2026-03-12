@@ -222,18 +222,7 @@ export default function TabBar({ gender, onEditTabs, externalEditOpen, onExterna
           );
         })}
 
-        {/* 编辑按钮（如果导航项少于6个，显示一个+号） */}
-        {activeTabIds.length < 6 && (
-          <button
-            onClick={() => setShowEditModal(true)}
-            className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl"
-          >
-            <div className="w-6 h-6 rounded-full border-2 border-dashed border-[#d0d0d0] flex items-center justify-center">
-              <span className="text-[#b0b0b0] text-sm font-bold leading-none">+</span>
-            </div>
-            <span className="text-[10px] font-semibold text-[#d0d0d0]">更多</span>
-          </button>
-        )}
+        {/* 不显示「更多」按马，仅在首页的「更多」面板中添加 */}
       </div>
     </>
   );

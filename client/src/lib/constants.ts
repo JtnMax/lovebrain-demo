@@ -16,13 +16,13 @@ export const APP_SLOGAN = "让爱更有温度";
 export const USERS = {
   female: {
     name: "小心心",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop&crop=face",
+    avatar: "/avatars/female.png",
     zodiac: "双鱼座",
     zodiacEmoji: "♓",
   },
   male: {
     name: "大宝贝",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face",
+    avatar: "/avatars/male.png",
     zodiac: "狮子座",
     zodiacEmoji: "♌",
   },

@@ -53,19 +53,19 @@ export default function LoginScreen({ gender }: { gender: Gender }) {
       <div className="px-6 mt-4 space-y-3">
         {/* Phone input */}
         <div className="bg-[#F7F3F0] rounded-2xl overflow-hidden border" style={{ borderColor: t.cardBorder }}>
-          <div className="flex items-center px-4 py-3.5 border-b" style={{ borderColor: t.cardBorder }}>
-            <span className="text-[#2C3E50] font-semibold mr-3 pr-3 border-r" style={{ borderColor: t.cardBorder }}>+86</span>
+          <div className="flex items-center px-4 py-3.5 border-b gap-2" style={{ borderColor: t.cardBorder }}>
+            <span className="text-[#2C3E50] font-semibold flex-shrink-0 border-r pr-3" style={{ borderColor: t.cardBorder }}>+86</span>
             <input
               type="tel"
               placeholder="电话号码"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              className="flex-1 bg-transparent outline-none text-[#2C3E50] placeholder-[#b0b0b0]"
+              className="flex-1 min-w-0 bg-transparent outline-none text-[#2C3E50] placeholder-[#b0b0b0]"
             />
             <button
               onClick={handleGetCode}
-              className="font-semibold text-sm whitespace-nowrap"
-              style={{ color: t.primary }}
+              className="font-semibold text-xs flex-shrink-0 px-2 py-1 rounded transition-colors"
+              style={{ color: t.primary, backgroundColor: `${t.primary}15` }}
             >
               获取验证码
             </button>

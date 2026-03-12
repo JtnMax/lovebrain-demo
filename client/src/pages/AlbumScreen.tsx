@@ -4,7 +4,7 @@
 import { useApp, Gender } from "@/contexts/AppContext";
 import { THEME } from "@/lib/constants";
 import { motion } from "framer-motion";
-import { ArrowLeft, Plus, Lock } from "lucide-react";
+import { ArrowLeft, Plus, Lock, MapPin } from "lucide-react";
 
 const albums = [
   {
@@ -58,6 +58,31 @@ export default function AlbumScreen({ gender }: { gender: Gender }) {
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 pb-8">
+        {/* 旅行地图入口 */}
+        <motion.button
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          onClick={() => navigate("travel-map", gender)}
+          className="w-full love-card p-4 mb-4 flex items-center gap-3"
+          style={{
+            backgroundImage: `linear-gradient(135deg, ${t.primary}20, ${t.accent}20)`,
+          }}
+        >
+          <div
+            className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
+            style={{ background: t.primary }}
+          >
+            <MapPin size={20} color="white" />
+          </div>
+          <div className="flex-1 text-left">
+            <p className="font-bold text-[#2C3E50]">旅行地图</p>
+            <p className="text-xs text-[#7f8c8d]">记录你们去过的地方</p>
+          </div>
+          <svg className="w-5 h-5 text-[#b0b0b0]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </motion.button>
+
         <div className="grid grid-cols-2 gap-3">
           {albums.map((album, i) => (
             <motion.button

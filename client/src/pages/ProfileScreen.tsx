@@ -12,10 +12,6 @@ import {
 } from "lucide-react";
 
 const menuItems = [
-  { icon: Calendar, label: "纪念日管理", screen: "anniversary" as const, color: "#FFC800" },
-  { icon: Image, label: "相册", screen: "album" as const, color: "#4ECDC4" },
-  { icon: BookOpen, label: "恋爱日记", screen: "diary-create" as const, color: "#FF6B8A" },
-  { icon: Star, label: "愿望清单", screen: "wishes" as const, color: "#FF6B35" },
   { icon: Shield, label: "隐私设置", screen: "settings" as const, color: "#B8A9C9" },
   { icon: HelpCircle, label: "帮助与反馈", screen: "settings" as const, color: "#7f8c8d" },
 ];
@@ -102,51 +98,56 @@ export default function ProfileScreen({ gender }: { gender: Gender }) {
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="love-card bg-[#E8FFF8] border-[#B8F0E4] flex items-center gap-3"
+          className="love-card flex items-center gap-3 p-4"
         >
-          <motion.img
-            src={MASCOT.waving}
-            alt="吉祥物"
-            className="w-14 h-14"
-            animate={{ rotate: [0, 10, -10, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          />
+          <img src={MASCOT.love} alt="mascot" className="w-12 h-12" />
           <div className="flex-1">
-            <p className="font-bold text-[#2C3E50] text-sm">完善你的档案！</p>
-            <p className="text-xs text-[#7f8c8d]">还差 1 步就完成啦</p>
+            <p className="font-bold text-[#2C3E50] text-sm">完善你的档案</p>
+            <p className="text-xs text-[#7f8c8d]">让 TA 更了解你</p>
           </div>
-          <button className="btn-jelly btn-jelly-green px-4 py-2 text-sm rounded-xl">
-            继续
+          <button
+            onClick={() => navigate("onboarding", gender)}
+            className="px-3 py-1.5 rounded-full text-xs font-bold text-white transition-all"
+            style={{ background: t.primary }}
+          >
+            去设置
           </button>
         </motion.div>
       </div>
 
       {/* Menu */}
       <div className="flex-1 overflow-y-auto px-4 pb-24">
-        <div className="love-card p-0 overflow-hidden">
+        {/* Menu items */}
+        <div className="space-y-2">
           {menuItems.map((item, i) => {
             const Icon = item.icon;
             return (
               <motion.button
-                key={i}
-                initial={{ x: -10, opacity: 0 }}
+                key={item.label}
+                initial={{ x: -20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.3 + i * 0.05 }}
+                transition={{ delay: 0.15 + i * 0.05 }}
                 onClick={() => navigate(item.screen, gender)}
-                className="w-full flex items-center gap-3 px-4 py-3.5 border-b last:border-b-0 active:bg-[#F7F3F0] transition-colors"
-                style={{ borderColor: t.cardBorder }}
+                className="w-full love-card flex items-center gap-3 p-4 text-left group hover:shadow-lg transition-all"
               >
                 <div
-                  className="w-9 h-9 rounded-xl flex items-center justify-center"
-                  style={{ background: `${item.color}20` }}
+                  className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform"
+                  style={{ background: item.color }}
                 >
-                  <Icon size={18} color={item.color} />
+                  <Icon size={18} color="white" />
                 </div>
-                <span className="flex-1 text-left font-semibold text-[#2C3E50] text-sm">{item.label}</span>
-                <ChevronRight size={16} color="#b0b0b0" />
+                <span className="flex-1 font-semibold text-[#2C3E50]">{item.label}</span>
+                <ChevronRight size={18} color="#b0b0b0" />
               </motion.button>
             );
           })}
+        </div>
+
+        {/* Tip: Other features in Home More */}
+        <div className="mt-6 p-4 bg-[#f5f5f5] rounded-2xl text-center">
+          <p className="text-xs text-[#7f8c8d]">
+            💡 纪念日、相册、日记、愿望等功能已移至首页「更多」面板
+          </p>
         </div>
 
         {/* End relationship */}
@@ -155,13 +156,14 @@ export default function ProfileScreen({ gender }: { gender: Gender }) {
           className="w-full mt-4 love-card flex items-center gap-3 border-[#fde2e2]"
         >
           <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-red-50">
-            <LogOut size={18} color="#e74c3c" />
+            <Heart size={16} color="#FF6B8A" />
           </div>
-          <span className="flex-1 text-left font-semibold text-[#e74c3c] text-sm">结束关系</span>
-          <ChevronRight size={16} color="#e74c3c" />
+          <span className="flex-1 font-semibold text-[#FF6B8A]">结束关系</span>
+          <ChevronRight size={18} color="#b0b0b0" />
         </button>
       </div>
 
+      {/* TabBar */}
       <TabBar gender={gender} />
     </div>
   );
