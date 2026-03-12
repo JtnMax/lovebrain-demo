@@ -100,7 +100,8 @@ function AchievementCard({
 }
 
 /* ─── 信号已读状态图标 ─── */
-function SignalStatus({ signal, myGender, t }: { signal: SignalEvent; myGender: Gender; t: typeof THEME.female }) {
+function SignalStatus({ signal, myGender, t }: { signal?: SignalEvent; myGender: Gender; t: typeof THEME.female }) {
+  if (!signal) return null;
   const partnerColor = myGender === "female" ? THEME.male.primary : THEME.female.primary;
   const isRead = signal.status === "read";
   const isDelivered = signal.status === "delivered" || isRead;

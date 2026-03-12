@@ -8,7 +8,7 @@ import { motion } from "framer-motion";
 import TabBar from "@/components/TabBar";
 import {
   Settings, ChevronRight, Shield, HelpCircle, Heart, Award,
-  Sparkles, Zap, Star, Clock, UserPlus
+  Sparkles, Zap, Star, Clock, UserPlus, HeartOff
 } from "lucide-react";
 
 const menuItems = [
@@ -129,29 +129,26 @@ export default function ProfileScreen({ gender }: { gender: Gender }) {
 
       {/* Main Menu Section */}
       <div className="flex-1 overflow-y-auto px-6 pb-24 no-scrollbar">
-        {/* Profile Completion Card */}
+        {/* Profile Completion Card - Active Style */}
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.4 }}
-          className="bg-gradient-to-br from-[#2C3E50] to-[#4A5568] rounded-[28px] p-5 mb-6 relative overflow-hidden shadow-lg"
+          className="btn-jelly btn-jelly-green rounded-[28px] p-5 mb-6 relative overflow-hidden shadow-lg flex items-center gap-4"
         >
-          <div className="relative z-10 flex items-center gap-4">
-            <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md">
-              <UserPlus size={24} color="white" />
-            </div>
-            <div className="flex-1">
-              <p className="text-white font-black text-base">完善你的档案</p>
-              <p className="text-white/60 text-xs">让 TA 更了解你的喜好</p>
-            </div>
-            <button
-              onClick={() => navigate("onboarding", gender)}
-              className="bg-white text-[#2C3E50] px-4 py-2 rounded-2xl text-xs font-black shadow-sm active:scale-95 transition-all"
-            >
-              去设置
-            </button>
+          <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
+            <Sparkles size={24} color="white" />
           </div>
-          <Sparkles className="absolute -top-2 -right-2 opacity-20" size={60} color="white" />
+          <div className="flex-1">
+            <p className="font-black text-[#2C3E50] text-base">完善你的档案！</p>
+            <p className="text-xs text-[#7f8c8d]">还差 1 步就完成啦</p>
+          </div>
+          <button
+            onClick={() => navigate("onboarding", gender)}
+            className="btn-jelly btn-jelly-green px-4 py-2 text-sm rounded-xl"
+          >
+            继续
+          </button>
         </motion.div>
 
         {/* Menu Items */}
@@ -188,16 +185,16 @@ export default function ProfileScreen({ gender }: { gender: Gender }) {
           </p>
         </div>
 
-        {/* End Relationship - The "Cold" Entrance */}
+        {/* End Relationship - Cold/Heartless Style */}
         <button
           onClick={() => navigate("end-relationship", gender)}
-          className="w-full py-4 px-6 rounded-2xl flex items-center gap-3 border-2 border-dashed border-[#fde2e2] group active:bg-red-50 transition-all"
+          className="w-full py-4 px-6 rounded-2xl flex items-center gap-3 border-2 border-dashed border-[#d0d0d0] group active:bg-gray-50 transition-all"
         >
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-red-50 group-hover:bg-red-100 transition-colors">
-            <Heart size={16} color="#FF6B8A" className="group-hover:scale-90 transition-transform" />
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-gray-100 group-hover:bg-gray-200 transition-colors">
+            <HeartOff size={16} color="#a0a0a0" className="group-hover:scale-90 transition-transform" />
           </div>
-          <span className="flex-1 font-bold text-[#FF6B8A] text-sm">结束关系</span>
-          <ChevronRight size={16} color="#FF6B8A" className="opacity-40" />
+          <span className="flex-1 font-bold text-[#a0a0a0] text-sm">结束关系</span>
+          <ChevronRight size={16} color="#a0a0a0" className="opacity-40" />
         </button>
         
         <p className="text-center text-[10px] text-[#b0b0b0] mt-8 mb-4 font-medium">
