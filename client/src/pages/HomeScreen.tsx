@@ -400,8 +400,8 @@ export default function HomeScreen({ gender }: { gender: Gender }) {
         >
           <div className="relative">
             <img
-              src={USER_AVATARS[targetGender]}
-              alt={partner.name}
+              src={USER_AVATARS[gender]}
+              alt={me.name}
               className="w-14 h-14 rounded-full object-cover border-3"
               style={{ borderColor: t.primary }}
             />
