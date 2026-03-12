@@ -269,9 +269,11 @@ export default function HomeScreen({ gender }: { gender: Gender }) {
   /* ── 对方的状态 ── */
   const partnerStatus = userStatuses[partnerGender];
 
-  /* ── 近5条对方发来的信号：有回复按回复时间排序，无回复按发送时间排序 ── */
+  /* ── 近5条对方当天发来的信号：有回复按回复时间排序，无回复按发送时间排序 ── */
+  const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+  const todayEnd = new Date(); todayEnd.setHours(23, 59, 59, 999);
   const recentSignals = signals
-    .filter((s) => s.from === partnerGender)
+    .filter((s) => s.from === partnerGender && s.timestamp >= todayStart.getTime() && s.timestamp <= todayEnd.getTime())
     .sort((a, b) => {
       const aTime = a.reply ? a.reply.timestamp : a.timestamp;
       const bTime = b.reply ? b.reply.timestamp : b.timestamp;
@@ -565,7 +567,7 @@ export default function HomeScreen({ gender }: { gender: Gender }) {
         <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }} className="love-card space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="font-black text-[#2C3E50] text-base">关心一下</h3>
-            <button onClick={() => navigate("signal-send", gender)} className="text-xs font-semibold" style={{ color: t.primary }}>
+            <button onClick={() => navigate("signal-receive", gender)} className="text-xs font-semibold" style={{ color: t.primary }}>
               历史记录 →
             </button>
           </div>
