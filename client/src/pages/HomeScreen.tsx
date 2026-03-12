@@ -8,7 +8,7 @@
  * - 宇宙来信入口
  * - 纪念日提醒
  */
-import { useApp, Gender, SignalEvent } from "@/contexts/AppContext";
+import { useApp, Gender, SignalEvent, SignalReply } from "@/contexts/AppContext";
 import { MASCOT, USERS, COUPLE_INFO, CARE_SIGNALS, MOCK_ANNIVERSARIES, THEME } from "@/lib/constants";
 import { motion, AnimatePresence } from "framer-motion";
 import TabBar from "@/components/TabBar";
@@ -123,8 +123,26 @@ function SignalDetailModal({
   t: typeof THEME.female;
 }) {
   const [replyText, setReplyText] = useState("");
-  const { toast } = useApp();
+  const [replyMediaType, setReplyMediaType] = useState<SignalReply["mediaType"]>("text");
+  const { toast, replyToSignal } = useApp();
   const isMine = signal.from === myGender;
+  const hasReplied = !!signal.reply;
+
+  const handleReply = () => {
+    if (!replyText.trim() && replyMediaType === "text") return;
+    replyToSignal(signal.id, {
+      text: replyText || undefined,
+      mediaType: replyMediaType,
+    });
+    toast("回复已发送 💌", myGender);
+    onClose();
+  };
+
+  const handleMediaReply = (type: SignalReply["mediaType"], label: string) => {
+    replyToSignal(signal.id, { mediaType: type, text: label });
+    toast(`${label}已发送`, myGender);
+    onClose();
+  };
 
   return (
     <motion.div
@@ -145,7 +163,7 @@ function SignalDetailModal({
         <div className="w-10 h-1 bg-[#e0e0e0] rounded-full mx-auto mb-4" />
         <div className="flex items-center gap-3 mb-4">
           <span className="text-4xl">{signal.emoji}</span>
-          <div>
+          <div className="flex-1">
             <p className="font-black text-[#2C3E50] text-lg">{signal.text}</p>
             <p className="text-xs text-[#7f8c8d]">
               {isMine ? "我发送的" : "TA发给你的"} · {new Date(signal.timestamp).toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" })}
@@ -155,30 +173,71 @@ function SignalDetailModal({
             <SignalStatus signal={signal} myGender={myGender} t={t} />
           </div>
         </div>
-        {!isMine && (
+
+        {/* 已有回复内容展示 */}
+        {signal.reply && (
+          <div className="mb-3 p-3 rounded-2xl" style={{ background: `${t.primary}10` }}>
+            <p className="text-xs font-bold mb-1" style={{ color: t.primary }}>💬 回复内容</p>
+            <p className="text-sm text-[#2C3E50]">
+              {signal.reply.mediaType === "image" ? "📷 图片" :
+               signal.reply.mediaType === "voice" ? "🎤 语音" :
+               signal.reply.mediaType === "location" ? "📍 位置" :
+               signal.reply.text || ""}
+            </p>
+            <p className="text-[10px] text-[#b0b0b0] mt-1">
+              {new Date(signal.reply.timestamp).toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" })}
+            </p>
+          </div>
+        )}
+
+        {/* 回复区域（接收方且未回复过） */}
+        {!isMine && !hasReplied && (
           <div className="mt-2">
             <p className="text-xs text-[#7f8c8d] mb-2 font-semibold">回复（仅限一次）</p>
-            <div className="flex gap-2">
+            {/* 文本回复 */}
+            <div className="flex gap-2 mb-2">
               <input
                 value={replyText}
-                onChange={(e) => setReplyText(e.target.value)}
+                onChange={(e) => { setReplyText(e.target.value); setReplyMediaType("text"); }}
                 placeholder="说点什么..."
                 className="flex-1 bg-[#f5f5f5] rounded-2xl px-4 py-2.5 text-sm outline-none text-[#2C3E50]"
+                onKeyDown={(e) => e.key === "Enter" && handleReply()}
               />
               <button
-                onClick={() => { if (replyText) { toast("回复已发送 💌", myGender); onClose(); } }}
+                onClick={handleReply}
                 className="w-10 h-10 rounded-2xl flex items-center justify-center"
-                style={{ background: t.primary }}
+                style={{ background: replyText ? t.primary : "#e0e0e0" }}
               >
                 <Send size={16} color="white" />
               </button>
             </div>
-            <div className="flex gap-2 mt-2">
-              {["❤️", "😊", "🥺", "👍", "😘"].map((e) => (
-                <button key={e} onClick={() => setReplyText(e)} className="text-xl p-1">{e}</button>
+            {/* 表情快捷回复 */}
+            <div className="flex gap-2 mb-3">
+              {["❤️", "😊", "🥺", "👍", "😘", "🎉"].map((e) => (
+                <button key={e} onClick={() => { setReplyText(e); setReplyMediaType("emoji"); }} className="text-xl p-1 active:scale-90 transition-transform">{e}</button>
+              ))}
+            </div>
+            {/* 媒体类型回复 */}
+            <div className="flex gap-2">
+              {[
+                { type: "image" as const,    emoji: "🖼️", label: "图片" },
+                { type: "voice" as const,    emoji: "🎤", label: "语音" },
+                { type: "location" as const, emoji: "📍", label: "位置" },
+              ].map((btn) => (
+                <button
+                  key={btn.type}
+                  onClick={() => handleMediaReply(btn.type, `${btn.emoji} ${btn.label}`)}
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#f5f5f5] text-[11px] text-[#7f8c8d] font-semibold active:scale-95 transition-transform"
+                >
+                  <span>{btn.emoji}</span>
+                  <span>{btn.label}</span>
+                </button>
               ))}
             </div>
           </div>
+        )}
+        {!isMine && hasReplied && (
+          <p className="text-xs text-[#b0b0b0] text-center mt-2">已回复过该信号</p>
         )}
       </motion.div>
     </motion.div>
@@ -210,10 +269,14 @@ export default function HomeScreen({ gender }: { gender: Gender }) {
   /* ── 对方的状态 ── */
   const partnerStatus = userStatuses[partnerGender];
 
-  /* ── 近5条对方发来的信号 ── */
+  /* ── 近5条对方发来的信号：有回复按回复时间排序，无回复按发送时间排序 ── */
   const recentSignals = signals
     .filter((s) => s.from === partnerGender)
-    .sort((a, b) => b.timestamp - a.timestamp)
+    .sort((a, b) => {
+      const aTime = a.reply ? a.reply.timestamp : a.timestamp;
+      const bTime = b.reply ? b.reply.timestamp : b.timestamp;
+      return bTime - aTime;
+    })
     .slice(0, 5);
 
   /* ── 戳一下处理 ── */
@@ -632,7 +695,7 @@ export default function HomeScreen({ gender }: { gender: Gender }) {
           <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }}>
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-bold text-[#2C3E50] text-sm">TA 发来的信号</h3>
-              <button onClick={() => navigate("signal-send", gender)} className="text-xs font-semibold" style={{ color: t.primary }}>
+              <button onClick={() => navigate("signal-receive", gender)} className="text-xs font-semibold" style={{ color: t.primary }}>
                 查看全部
               </button>
             </div>

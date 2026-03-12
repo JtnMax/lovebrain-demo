@@ -33,6 +33,14 @@ export type Screen =
 
 export type Gender = "female" | "male";
 
+// Signal reply
+export interface SignalReply {
+  text?: string;
+  emoji?: string;
+  mediaType?: "text" | "image" | "voice" | "location" | "emoji";
+  timestamp: number;
+}
+
 // Signal event for cross-phone communication
 export interface SignalEvent {
   id: string;
@@ -43,6 +51,7 @@ export interface SignalEvent {
   text: string;
   timestamp: number;
   status: "sending" | "delivered" | "read";
+  reply?: SignalReply; // 接收方最多回复1次
 }
 
 interface PhoneState {
@@ -74,6 +83,7 @@ interface AppContextType {
   signals: SignalEvent[];
   sendSignal: (signal: Omit<SignalEvent, "id" | "timestamp" | "status">, options?: { skipSenderNavigation?: boolean }) => void;
   markSignalRead: (id: string) => void;
+  replyToSignal: (signalId: string, reply: Omit<SignalReply, "timestamp">) => void;
   // Navigation per phone
   navigate: (screen: Screen, gender?: Gender) => void;
   goBack: (gender?: Gender) => void;
@@ -248,6 +258,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     );
   }, []);
 
+  const replyToSignal = useCallback((signalId: string, reply: Omit<SignalReply, "timestamp">) => {
+    setSignals((prev) =>
+      prev.map((s) =>
+        s.id === signalId && !s.reply
+          ? { ...s, reply: { ...reply, timestamp: Date.now() }, status: "read" }
+          : s
+      )
+    );
+  }, []);
+
   const addChatMessage = useCallback((msg: Omit<ChatMessage, "id" | "time">) => {
     const newMsg: ChatMessage = {
       ...msg,
@@ -271,6 +291,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         signals,
         sendSignal,
         markSignalRead,
+        replyToSignal,
         navigate,
         goBack,
         setActiveTab,
