@@ -19,12 +19,6 @@ import {
 } from "lucide-react";
 import { useState, useRef } from "react";
 
-/* ─── 中国人头像（Unsplash） ─── */
-const CN_AVATARS = {
-  female: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=200&h=200&fit=crop&crop=face",
-  male:   "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&h=200&fit=crop&crop=face",
-};
-
 /* ─── 回执偏好模式 ─── */
 const NOTIFY_MODES = [
   { id: "normal",  icon: Volume2,  emoji: "🔔", label: "常规", color: "#FF6B8A" },
@@ -257,20 +251,345 @@ export default function HomeScreen({ gender }: { gender: Gender }) {
 
   return (
     <div className="h-full flex flex-col relative overflow-hidden" style={{ background: t.bg }}>
+      {/* Header */}
+      <div className="pt-12 pb-4 px-4 flex items-center justify-between z-10">
+        <div className="flex items-center gap-2">
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setAchievementType("days")}
+            className="flex items-center gap-1 bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm border border-white"
+          >
+            <Heart size={16} fill={t.primary} color={t.primary} />
+            <span className="text-sm font-black text-[#2C3E50]">{COUPLE_INFO.daysInLove}</span>
+          </motion.button>
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setAchievementType("streak")}
+            className="flex items-center gap-1 bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm border border-white"
+          >
+            <Flame size={16} fill="#FF6B35" color="#FF6B35" />
+            <span className="text-sm font-black text-[#2C3E50]">12</span>
+          </motion.button>
+        </div>
 
-      {/* ── 成就卡片弹窗 ── */}
+        <div className="flex items-center gap-2">
+          {/* Notify Mode Quick Switch */}
+          <div className="flex bg-white/80 backdrop-blur-sm p-1 rounded-full shadow-sm border border-white">
+            {NOTIFY_MODES.map((m) => (
+              <button
+                key={m.id}
+                onClick={() => handleNotifySwitch(m.id)}
+                className="w-8 h-8 rounded-full flex items-center justify-center transition-all"
+                style={{ background: notifyMode === m.id ? m.color : "transparent" }}
+              >
+                <m.icon size={14} color={notifyMode === m.id ? "white" : "#b0b0b0"} />
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={() => setShowMorePanel(!showMorePanel)}
+            className="w-10 h-10 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm border border-white"
+          >
+            <MoreHorizontal size={20} color="#2C3E50" />
+          </button>
+        </div>
+      </div>
+
+      {/* Achievement Modal */}
       <AnimatePresence>
         {achievementType && (
           <AchievementCard
             type={achievementType}
-            value={achievementType === "days" ? COUPLE_INFO.daysInLove : 7}
+            value={achievementType === "days" ? COUPLE_INFO.daysInLove : 12}
             onClose={() => setAchievementType(null)}
             t={t}
           />
         )}
       </AnimatePresence>
 
-      {/* ── 信号详情弹窗 ── */}
+      {/* More Panel (Duolingo Style) */}
+      <AnimatePresence>
+        {showMorePanel && (
+          <motion.div
+            initial={{ y: -100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -100, opacity: 0 }}
+            className="absolute top-24 left-4 right-4 z-40 bg-white rounded-3xl shadow-xl p-4 border-2"
+            style={{ borderColor: t.cardBorder }}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="font-black text-[#2C3E50] text-sm">更多功能</h4>
+              <button onClick={() => setShowMorePanel(false)}><X size={16} color="#b0b0b0" /></button>
+            </div>
+            <div className="flex overflow-x-auto gap-4 pb-2 no-scrollbar">
+              {MORE_MODULES.map((mod) => (
+                <button
+                  key={mod.id}
+                  onClick={() => { navigate(mod.screen, gender); setShowMorePanel(false); }}
+                  className="flex-shrink-0 flex flex-col items-center gap-2"
+                >
+                  <div
+                    className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-sm border-b-4 active:border-b-0 active:translate-y-1 transition-all"
+                    style={{ background: mod.bg, borderColor: `${mod.color}40` }}
+                  >
+                    <mod.icon size={24} color={mod.color} />
+                  </div>
+                  <span className="text-[10px] font-bold text-[#7f8c8d]">{mod.label}</span>
+                </button>
+              ))}
+              {/* Edit TabBar Button */}
+              <button
+                onClick={() => { setShowTabEdit(true); setShowMorePanel(false); }}
+                className="flex-shrink-0 flex flex-col items-center gap-2"
+              >
+                <div className="w-14 h-14 rounded-2xl border-2 border-dashed border-[#d0d0d0] flex items-center justify-center">
+                  <MapPin size={20} color="#b0b0b0" />
+                </div>
+                <span className="text-[10px] font-bold text-[#b0b0b0]">📌 编辑</span>
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Main Content */}
+      <div className="flex-1 overflow-y-auto px-4 pb-24 no-scrollbar">
+        {/* Partner Card */}
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="love-card mb-6 mt-2"
+        >
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <img
+                src={partner.avatar}
+                alt={partner.name}
+                className="w-16 h-16 rounded-full object-cover border-3"
+                style={{ borderColor: gender === "female" ? THEME.male.primary : THEME.female.primary }}
+              />
+              <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
+                <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+              </div>
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="font-black text-[#2C3E50] text-lg">{partner.name}</h3>
+                <span className="text-[10px] px-2 py-0.5 bg-[#f0f0f0] rounded-full text-[#7f8c8d] font-bold">
+                  {selectedStatus || "在线"}
+                </span>
+              </div>
+              <div className="flex items-center gap-1 text-xs text-[#7f8c8d]">
+                <SignalStatus signal={signals[0]} myGender={gender} t={t} />
+                <span className="ml-1">心意联通中...</span>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowStatusPicker(true)}
+              className="w-10 h-10 rounded-2xl bg-[#f5f5f5] flex items-center justify-center active:scale-95 transition-all"
+            >
+              <Smile size={20} color="#7f8c8d" />
+            </button>
+          </div>
+        </motion.div>
+
+        {/* Status Picker */}
+        <AnimatePresence>
+          {showStatusPicker && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className="love-card mb-4 grid grid-cols-4 gap-2 p-3"
+            >
+              {STATUS_OPTIONS.map((opt) => (
+                <button
+                  key={opt.label}
+                  onClick={() => { setSelectedStatus(`${opt.emoji} ${opt.label}`); setShowStatusPicker(false); }}
+                  className="flex flex-col items-center gap-1 p-2 rounded-xl hover:bg-[#f5f5f5] transition-all"
+                >
+                  <span className="text-xl">{opt.emoji}</span>
+                  <span className="text-[10px] font-bold text-[#7f8c8d]">{opt.label}</span>
+                </button>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Care Signal Area */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="font-black text-[#2C3E50]">关心信号</h4>
+            <div className="flex items-center gap-1 text-[10px] font-bold text-[#7f8c8d]">
+              {currentNotify.emoji} {currentNotify.label}模式
+            </div>
+          </div>
+
+          {/* Poke Button */}
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={handlePoke}
+            className="w-full h-24 rounded-3xl mb-4 flex flex-col items-center justify-center relative overflow-hidden shadow-lg group"
+            style={{ background: `linear-gradient(135deg, ${t.primary}, ${t.accent})` }}
+          >
+            <motion.div
+              animate={pokeCount > 0 ? { scale: [1, 1.2, 1], rotate: [0, -10, 10, 0] } : {}}
+              className="text-3xl mb-1"
+            >
+              👆
+            </motion.div>
+            <span className="text-white font-black text-lg">戳一下 TA</span>
+            {pokeCount > 0 && (
+              <motion.div
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="absolute top-2 right-4 bg-white/30 backdrop-blur-md px-2 py-1 rounded-full text-white text-[10px] font-black"
+              >
+                x{pokeCount}
+              </motion.div>
+            )}
+            <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+          </motion.button>
+
+          {/* Quick Signals Grid */}
+          <div className="grid grid-cols-4 gap-3 mb-4">
+            {CARE_SIGNALS.map((s) => (
+              <motion.button
+                key={s.id}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => handleQuickSignal(s)}
+                className="love-card p-3 flex flex-col items-center gap-1 active:shadow-inner transition-all"
+              >
+                <span className="text-2xl">{s.emoji}</span>
+                <span className="text-[10px] font-bold text-[#7f8c8d] whitespace-nowrap">{s.text}</span>
+              </motion.button>
+            ))}
+          </div>
+
+          {/* Custom Signal Input */}
+          {!showCustomInput ? (
+            <button
+              onClick={() => setShowCustomInput(true)}
+              className="w-full py-3 rounded-2xl border-2 border-dashed border-[#d0d0d0] text-[#b0b0b0] text-sm font-bold flex items-center justify-center gap-2"
+            >
+              <Plus size={16} /> 自定义关心信号
+            </button>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="love-card p-3"
+            >
+              <div className="flex gap-2 mb-2">
+                <input
+                  autoFocus
+                  value={customText}
+                  onChange={(e) => setCustomText(e.target.value)}
+                  placeholder="输入想对 TA 说的话..."
+                  className="flex-1 bg-[#f5f5f5] rounded-xl px-4 py-2 text-sm outline-none text-[#2C3E50]"
+                />
+                <button
+                  onClick={handleCustomSend}
+                  className="w-10 h-10 rounded-xl flex items-center justify-center text-white"
+                  style={{ background: t.primary }}
+                >
+                  <Send size={16} />
+                </button>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex gap-3">
+                  <button className="p-1"><Mic size={18} color="#b0b0b0" /></button>
+                  <button className="p-1"><Image size={18} color="#b0b0b0" /></button>
+                  <button className="p-1"><MapPin size={18} color="#b0b0b0" /></button>
+                </div>
+                <button onClick={() => setShowCustomInput(false)} className="text-xs text-[#7f8c8d] font-bold">取消</button>
+              </div>
+            </motion.div>
+          )}
+        </div>
+
+        {/* Recent Signals (History) */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="font-black text-[#2C3E50]">信号记录</h4>
+            <button onClick={() => navigate("timeline", gender)} className="text-xs font-bold text-[#7f8c8d] flex items-center">
+              全部 <ChevronRight size={14} />
+            </button>
+          </div>
+          <div className="space-y-2">
+            {recentSignals.length > 0 ? (
+              recentSignals.map((s) => (
+                <motion.button
+                  key={s.id}
+                  whileTap={{ scale: 0.98 }}
+                  onContextMenu={(e) => { e.preventDefault(); toast("已收藏该信号 ⭐", gender); }}
+                  onClick={() => setSelectedSignal(s)}
+                  className="w-full love-card p-3 flex items-center gap-3 text-left"
+                >
+                  <span className="text-2xl">{s.emoji}</span>
+                  <div className="flex-1">
+                    <p className="font-bold text-[#2C3E50] text-sm truncate">{s.text}</p>
+                    <p className="text-[10px] text-[#b0b0b0]">
+                      {new Date(s.timestamp).toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" })}
+                    </p>
+                  </div>
+                  <SignalStatus signal={s} myGender={gender} t={t} />
+                </motion.button>
+              ))
+            ) : (
+              <div className="love-card p-8 text-center">
+                <div className="w-12 h-12 bg-[#f5f5f5] rounded-full flex items-center justify-center mx-auto mb-2">
+                  <Send size={20} color="#d0d0d0" />
+                </div>
+                <p className="text-xs text-[#b0b0b0]">还没有信号记录，发送一个关心信号试试</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Anniversary Reminder */}
+        <motion.div
+          whileTap={{ scale: 0.98 }}
+          onClick={() => navigate("anniversary", gender)}
+          className="love-card p-4 mb-6 flex items-center gap-4 border-l-4"
+          style={{ borderLeftColor: "#FFC800" }}
+        >
+          <div className="w-12 h-12 bg-[#FFFBEA] rounded-2xl flex items-center justify-center flex-shrink-0">
+            <Calendar size={24} color="#FFC800" />
+          </div>
+          <div className="flex-1">
+            <p className="text-[10px] font-bold text-[#FFC800] uppercase tracking-wider">即将到来</p>
+            <p className="font-black text-[#2C3E50]">{MOCK_ANNIVERSARIES[0].title}</p>
+            <p className="text-xs text-[#7f8c8d]">还有 {MOCK_ANNIVERSARIES[0].daysLeft} 天</p>
+          </div>
+          <div className="text-right">
+            <p className="text-xs font-black text-[#2C3E50]">03-25</p>
+          </div>
+        </motion.div>
+
+        {/* Cosmos Letter Entrance */}
+        <motion.button
+          whileTap={{ scale: 0.98 }}
+          onClick={() => navigate("cosmos-letter", gender)}
+          className="w-full h-32 rounded-3xl mb-6 relative overflow-hidden shadow-lg group"
+        >
+          <img
+            src="https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?w=500&h=300&fit=crop"
+            className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+            alt="cosmos"
+          />
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]" />
+          <div className="absolute inset-0 p-5 flex flex-col justify-end">
+            <div className="flex items-center gap-2 mb-1">
+              <Sparkles size={18} color="#FFC800" />
+              <span className="text-white font-black text-lg">宇宙来信</span>
+            </div>
+            <p className="text-white/80 text-xs">写给未来的 TA，在星辰中永恒...</p>
+          </div>
+        </motion.button>
+      </div>
+
+      {/* Signal Detail Modal */}
       <AnimatePresence>
         {selectedSignal && (
           <SignalDetailModal
@@ -282,443 +601,33 @@ export default function HomeScreen({ gender }: { gender: Gender }) {
         )}
       </AnimatePresence>
 
-      {/* ── 顶部状态栏 ── */}
-      <div className="pt-10 px-4 pb-2 flex-shrink-0">
-        <div className="flex items-center justify-between">
-          {/* 桃心 + 天数 */}
-          <button
-            onClick={() => setAchievementType(achievementType === "days" ? null : "days")}
-            className="flex items-center gap-1.5 active:scale-90 transition-transform"
-          >
-            <motion.div animate={{ scale: [1, 1.15, 1] }} transition={{ duration: 2, repeat: Infinity }}>
-              <Heart size={18} fill={t.primary} color={t.primary} />
-            </motion.div>
-            <span className="font-black text-sm" style={{ color: t.primary }}>{COUPLE_INFO.daysInLove}</span>
-          </button>
-
-          {/* 火苗 + 连续天数 */}
-          <button
-            onClick={() => setAchievementType(achievementType === "streak" ? null : "streak")}
-            className="flex items-center gap-1.5 active:scale-90 transition-transform"
-          >
-            <motion.div animate={{ rotate: [-5, 5, -5] }} transition={{ duration: 1.5, repeat: Infinity }}>
-              <Flame size={18} color="#FF6B35" fill="#FF6B35" />
-            </motion.div>
-            <span className="font-black text-sm text-[#FF6B35]">7</span>
-          </button>
-
-          {/* 更多功能入口（多邻国风格） */}
-          <button
-            onClick={() => setShowMorePanel(!showMorePanel)}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-full transition-all"
-            style={{ background: showMorePanel ? t.primary : `${t.primary}15` }}
-          >
-            <MoreHorizontal size={16} color={showMorePanel ? "white" : t.primary} />
-            <span className="text-xs font-bold" style={{ color: showMorePanel ? "white" : t.primary }}>更多</span>
-          </button>
-
-          {/* 回执偏好快速切换 */}
-          <div className="flex items-center gap-0.5 bg-white/80 rounded-full px-2 py-1.5 border" style={{ borderColor: t.cardBorder }}>
-            {NOTIFY_MODES.map((mode) => {
-              const ModeIcon = mode.icon;
-              const isActive = notifyMode === mode.id;
-              return (
-                <motion.button
-                  key={mode.id}
-                  onClick={() => handleNotifySwitch(mode.id as typeof notifyMode)}
-                  className="w-7 h-7 rounded-full flex items-center justify-center transition-all"
-                  style={{ background: isActive ? mode.color : "transparent" }}
-                  whileTap={{ scale: 0.85 }}
-                >
-                  <ModeIcon size={13} color={isActive ? "white" : "#b0b0b0"} />
-                </motion.button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* 更多功能展开面板 */}
-        <AnimatePresence>
-          {showMorePanel && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.25 }}
-              className="overflow-hidden mt-2"
-            >
-              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-                {MORE_MODULES.map((mod, i) => {
-                  const ModIcon = mod.icon;
-                  return (
-                    <motion.button
-                      key={mod.id}
-                      initial={{ scale: 0, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={{ delay: i * 0.04, type: "spring", stiffness: 400 }}
-                      onClick={() => { navigate(mod.screen, gender); setShowMorePanel(false); }}
-                      className="flex-shrink-0 flex flex-col items-center gap-1 w-16"
-                    >
-                      <div
-                        className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm"
-                        style={{ background: mod.bg }}
-                      >
-                        <ModIcon size={22} color={mod.color} />
-                      </div>
-                      <span className="text-[10px] font-semibold text-[#7f8c8d]">{mod.label}</span>
-                    </motion.button>
-                  );
-                })}
-                {/* 编辑导航栏按钮（虚线框+工字钉） */}
-                <motion.button
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: MORE_MODULES.length * 0.04, type: "spring" }}
-                  onClick={() => { setShowMorePanel(false); setShowTabEdit(true); }}
-                  className="flex-shrink-0 flex flex-col items-center gap-1 w-16"
-                >
-                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center border-2 border-dashed border-[#d0d0d0]">
-                    <span className="text-lg">📌</span>
-                  </div>
-                  <span className="text-[10px] font-semibold text-[#b0b0b0]">编辑</span>
-                </motion.button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* ── 可滚动内容区 ── */}
-      <div className="flex-1 overflow-y-auto pb-24 px-4 space-y-3">
-
-        {/* 伴侣卡 */}
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          className="love-card flex items-center gap-4"
-        >
-          <div className="relative">
-            <img
-              src={CN_AVATARS[targetGender]}
-              alt={partner.name}
-              className="w-14 h-14 rounded-full object-cover border-3"
-              style={{ borderColor: t.primary }}
-            />
-            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-[#58CC02] rounded-full border-2 border-white flex items-center justify-center">
-              <motion.div className="w-2 h-2 rounded-full bg-white" animate={{ scale: [1, 0.5, 1] }} transition={{ duration: 2, repeat: Infinity }} />
-            </div>
-          </div>
-          <div className="flex-1">
-            <p className="font-bold text-[#2C3E50]">{partner.name}</p>
-            <p className="text-xs text-[#7f8c8d]">
-              在一起第 <span className="font-black" style={{ color: t.primary }}>{COUPLE_INFO.daysInLove}</span> 天
-            </p>
-          </div>
-          {/* 我的状态 */}
-          <button
-            onClick={() => setShowStatusPicker(!showStatusPicker)}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-full border text-xs font-semibold"
-            style={{ borderColor: t.cardBorder, background: t.primaryLight, color: t.primary }}
-          >
-            {selectedStatus ? <span>{selectedStatus}</span> : <span>设置状态</span>}
-          </button>
-        </motion.div>
-
-        {/* 状态选择器 */}
-        <AnimatePresence>
-          {showStatusPicker && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="overflow-hidden"
-            >
-              <div className="love-card">
-                <p className="text-xs font-bold text-[#7f8c8d] mb-2">选择你的状态</p>
-                <div className="grid grid-cols-4 gap-2">
-                  {STATUS_OPTIONS.map((s) => (
-                    <button
-                      key={s.label}
-                      onClick={() => {
-                        setSelectedStatus(`${s.emoji} ${s.label}`);
-                        setShowStatusPicker(false);
-                        toast(`状态已更新：${s.emoji} ${s.label}`, gender);
-                      }}
-                      className="flex flex-col items-center gap-1 p-2 rounded-xl hover:bg-[#f5f5f5] transition-colors"
-                    >
-                      <span className="text-xl">{s.emoji}</span>
-                      <span className="text-[10px] text-[#7f8c8d]">{s.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* ══ 关心信号区 ══ */}
-        <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }} className="love-card space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="font-black text-[#2C3E50] text-base">关心一下</h3>
-            <button onClick={() => navigate("signal-send", gender)} className="text-xs font-semibold" style={{ color: t.primary }}>
-              历史记录 →
-            </button>
-          </div>
-
-          {/* 1. 戳一下大按钮 */}
-          <motion.button
-            onClick={handlePoke}
-            whileTap={{ scale: 0.92 }}
-            className="w-full rounded-2xl py-4 flex items-center justify-center gap-3 relative overflow-hidden"
-            style={{
-              background: `linear-gradient(135deg, ${t.primary}, ${t.accent})`,
-              boxShadow: `0 6px 0 ${t.primaryDark}, 0 8px 15px ${t.primary}40`,
-            }}
-          >
-            {pokeCount >= 3 && (
-              <motion.div
-                className="absolute inset-0 flex items-center justify-center"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: [0, 0.3, 0] }}
-                transition={{ duration: 0.5 }}
-                style={{ background: "white" }}
-              />
-            )}
-            <motion.span
-              className="text-3xl"
-              animate={pokeCount >= 3 ? { rotate: [0, -15, 15, -15, 0], scale: [1, 1.4, 1] } : { scale: [1, 1.05, 1] }}
-              transition={{ duration: pokeCount >= 3 ? 0.5 : 2, repeat: Infinity }}
-            >
-              {pokeCount >= 3 ? "💥" : "👆"}
-            </motion.span>
-            <div className="text-left">
-              <p className="text-white font-black text-base">
-                {pokeCount >= 3 ? "疯狂戳！！！" : "戳一下 TA"}
-              </p>
-              <p className="text-white/80 text-xs">点一次 TA 就收到一次信号</p>
-            </div>
-            {pokeCount > 0 && (
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                className="absolute top-2 right-3 bg-white/30 rounded-full px-2 py-0.5"
-              >
-                <span className="text-white text-xs font-black">×{pokeCount}</span>
-              </motion.div>
-            )}
-          </motion.button>
-
-          {/* 2. 快捷信号 */}
-          <div>
-            <p className="text-xs font-bold text-[#7f8c8d] mb-2">快捷信号</p>
-            <div className="grid grid-cols-4 gap-2">
-              {CARE_SIGNALS.slice(0, 8).map((signal, i) => (
-                <motion.button
-                  key={signal.id}
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.05 * i, type: "spring" }}
-                  onClick={() => handleQuickSignal(signal)}
-                  className="love-card flex flex-col items-center py-2.5 gap-1 active:scale-95 transition-transform p-2"
-                  whileTap={{ scale: 0.9 }}
-                >
-                  <span className="text-xl">{signal.emoji}</span>
-                  <span className="text-[9px] font-semibold text-[#2C3E50] text-center leading-tight">{signal.text}</span>
-                </motion.button>
-              ))}
-            </div>
-          </div>
-
-          {/* 3. 自定义信号 */}
-          <div>
-            <button
-              onClick={() => setShowCustomInput(!showCustomInput)}
-              className="flex items-center gap-2 text-xs font-bold mb-2"
-              style={{ color: t.primary }}
-            >
-              <span>✏️</span>
-              <span>自定义信号</span>
-              <ChevronRight size={12} color={t.primary} className={`transition-transform ${showCustomInput ? "rotate-90" : ""}`} />
-            </button>
-            <AnimatePresence>
-              {showCustomInput && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  className="overflow-hidden"
-                >
-                  <div className="flex gap-2 mb-2">
-                    <input
-                      value={customText}
-                      onChange={(e) => setCustomText(e.target.value)}
-                      placeholder="说点什么..."
-                      className="flex-1 bg-[#f5f5f5] rounded-2xl px-4 py-2.5 text-sm outline-none text-[#2C3E50]"
-                      onKeyDown={(e) => e.key === "Enter" && handleCustomSend()}
-                    />
-                    <button
-                      onClick={handleCustomSend}
-                      className="w-10 h-10 rounded-2xl flex items-center justify-center"
-                      style={{ background: customText ? t.primary : "#e0e0e0" }}
-                    >
-                      <Send size={16} color="white" />
-                    </button>
-                  </div>
-                  {/* 媒体附件按钮 */}
-                  <div className="flex gap-2">
-                    {[
-                      { icon: Image, label: "图片", emoji: "🖼️" },
-                      { icon: Mic,   label: "语音", emoji: "🎤" },
-                      { icon: MapPin,label: "位置", emoji: "📍" },
-                      { icon: Smile, label: "表情", emoji: "😊" },
-                    ].map((btn) => (
-                      <button
-                        key={btn.label}
-                        onClick={() => toast(`${btn.emoji} ${btn.label}功能开发中`, gender)}
-                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-[#f5f5f5] text-[10px] text-[#7f8c8d] font-semibold"
-                      >
-                        <span>{btn.emoji}</span>
-                        <span>{btn.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </motion.div>
-
-        {/* ── 历史信号（近5条） ── */}
-        {recentSignals.length > 0 && (
-          <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }}>
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="font-bold text-[#2C3E50] text-sm">TA 发来的信号</h3>
-              <button onClick={() => navigate("signal-send", gender)} className="text-xs font-semibold" style={{ color: t.primary }}>
-                查看全部
-              </button>
-            </div>
-            <div className="space-y-2">
-              {recentSignals.map((sig) => (
-                <motion.button
-                  key={sig.id}
-                  onClick={() => setSelectedSignal(sig)}
-                  onContextMenu={(e) => { e.preventDefault(); toast("已收藏该信号 ⭐", gender); }}
-                  className="w-full love-card flex items-center gap-3 text-left active:scale-[0.98] transition-transform"
-                  whileTap={{ scale: 0.97 }}
-                >
-                  <span className="text-2xl">{sig.emoji}</span>
-                  <div className="flex-1">
-                    <p className="font-bold text-[#2C3E50] text-sm">{sig.text}</p>
-                    <p className="text-[10px] text-[#b0b0b0]">
-                      {new Date(sig.timestamp).toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" })}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {sig.status === "read" ? (
-                      <CheckCheck size={14} color="#58CC02" />
-                    ) : sig.status === "delivered" ? (
-                      <Check size={14} color="#b0b0b0" />
-                    ) : null}
-                    <ChevronRight size={14} color="#b0b0b0" />
-                  </div>
-                </motion.button>
-              ))}
-            </div>
-          </motion.div>
-        )}
-
-        {/* ── 宇宙来信入口 ── */}
-        <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.25 }}>
-          <button
-            onClick={() => navigate("cosmos-letter", gender)}
-            className="w-full love-card flex items-center gap-3 bg-gradient-to-r from-[#1a1a2e] to-[#16213e] border-none text-white overflow-hidden relative"
-          >
-            <div className="absolute inset-0 opacity-20">
-              {[...Array(8)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  className="absolute w-1 h-1 bg-white rounded-full"
-                  style={{ left: `${10 + i * 12}%`, top: `${20 + (i % 3) * 25}%` }}
-                  animate={{ opacity: [0.3, 1, 0.3] }}
-                  transition={{ duration: 2, delay: i * 0.3, repeat: Infinity }}
-                />
-              ))}
-            </div>
-            <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center relative z-10">
-              <Sparkles size={22} color="#FFC800" />
-            </div>
-            <div className="flex-1 relative z-10">
-              <p className="font-bold text-sm">宇宙来信</p>
-              <p className="text-xs text-white/70">今日{me.zodiac}运势 · 恋爱指数 {gender === "female" ? "92" : "85"}%</p>
-            </div>
-            <ChevronRight size={18} color="white" className="relative z-10 opacity-60" />
-          </button>
-        </motion.div>
-
-        {/* ── 即将到来的纪念日 ── */}
-        <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }}>
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="font-bold text-[#2C3E50] text-sm">即将到来</h3>
-            <button onClick={() => navigate("anniversary", gender)} className="text-xs font-semibold" style={{ color: t.primary }}>
-              查看全部
-            </button>
-          </div>
-          <div className="space-y-2">
-            {MOCK_ANNIVERSARIES.filter((a) => !a.isPast).slice(0, 2).map((ann, i) => (
-              <motion.div
-                key={ann.id}
-                initial={{ x: -20, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.35 + i * 0.1 }}
-                className="love-card flex items-center gap-3 cursor-pointer"
-                onClick={() => navigate("anniversary", gender)}
-              >
-                <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl" style={{ background: t.primaryLight }}>
-                  {ann.emoji}
-                </div>
-                <div className="flex-1">
-                  <p className="font-bold text-[#2C3E50] text-sm">{ann.title}</p>
-                  <p className="text-xs text-[#7f8c8d]">{ann.date}</p>
-                </div>
-                {ann.daysLeft > 0 ? (
-                  <div className="bg-[#FFC800] px-3 py-1 rounded-full">
-                    <span className="text-xs font-black text-white">{ann.daysLeft}天</span>
-                  </div>
-                ) : (
-                  <motion.div className="bg-[#58CC02] px-3 py-1 rounded-full" animate={{ scale: [1, 1.05, 1] }} transition={{ duration: 1.5, repeat: Infinity }}>
-                    <span className="text-xs font-black text-white">今天!</span>
-                  </motion.div>
-                )}
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* ── 吉祥物鼓励 ── */}
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="love-card flex items-center gap-4"
-          style={{ background: t.primaryLight, borderColor: `${t.primary}30` }}
-        >
-          <motion.img
-            src={MASCOT.happy}
-            alt="吉祥物"
-            className="w-14 h-14"
-            animate={{ rotate: [0, 5, -5, 0] }}
-            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-          />
-          <div className="flex-1">
-            <p className="font-bold text-sm" style={{ color: t.primary }}>今日小贴士</p>
-            <p className="text-xs text-[#2C3E50] mt-1 leading-relaxed">
-              连续互动 7 天了！记得给{partner.name}发一个关心信号哦~
-            </p>
-          </div>
-        </motion.div>
-      </div>
-
-      <TabBar gender={gender} externalEditOpen={showTabEdit} onExternalEditClose={() => setShowTabEdit(false)} />
+      {/* TabBar */}
+      <TabBar
+        gender={gender}
+        externalEditOpen={showTabEdit}
+        onExternalEditClose={() => setShowTabEdit(false)}
+      />
     </div>
+  );
+}
+
+/* ─── 辅助组件 ─── */
+function Plus({ size = 24, color = "currentColor" }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19"></line>
+      <line x1="5" y1="12" x2="19" y2="12"></line>
+    </svg>
+  );
+}
+
+function Calendar({ size = 24, color = "currentColor" }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+      <line x1="16" y1="2" x2="16" y2="6"></line>
+      <line x1="8" y1="2" x2="8" y2="6"></line>
+      <line x1="3" y1="10" x2="21" y2="10"></line>
+    </svg>
   );
 }

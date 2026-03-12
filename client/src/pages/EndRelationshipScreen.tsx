@@ -1,14 +1,6 @@
 /*
- * EndRelationshipScreen - 结束关系页
- * 完整流程：
- *   Step 0 - 信息说明（后果 + 规则）
- *   Step 1 - 最终确认（选原因）
- *   Step 2 - 冷静期倒计时（可撤回 / 非发起方恢复申请）
- *   Step 3 - 正式结束二次确认（冷静期满后）
- *   Step 4 - 数据导出模拟（填邮箱 + 导出）
- *   Step 5 - 完成归档
- *
- * SRS 流程 G: 结束关系（冷静期 → 正式结束 → 归档 → 导出）
+ * EndRelationshipScreen - 结束关系页 (绝情版 2.0)
+ * 强化视觉冲击力：色彩由暖转冷、破碎动画、沉重文案
  */
 import { useApp, Gender } from "@/contexts/AppContext";
 import { MASCOT, USERS, COUPLE_INFO, THEME } from "@/lib/constants";
@@ -16,14 +8,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft, AlertTriangle, Clock, Shield, Heart,
   Download, Mail, CheckCircle2, RotateCcw, ChevronRight,
-  Archive, Trash2, Lock, FileText
+  Archive, Trash2, Lock, FileText, X, HeartOff, Ghost,
+  CloudRain, Wind, ZapOff
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 
-// 冷静期总时长（Demo 用 72 小时，以秒展示倒计时；实际演示用缩短的时间）
-const COOLING_TOTAL_SECONDS = 72 * 3600; // 72小时
-// Demo 展示的初始剩余时间（模拟已过去一段时间）
-const DEMO_REMAINING = 71 * 3600 + 59 * 60 + 47; // 71:59:47
+// 冷静期总时长（Demo 用 72 小时）
+const COOLING_TOTAL_SECONDS = 72 * 3600;
+const DEMO_REMAINING = 71 * 3600 + 59 * 60 + 47;
 
 type Step = 0 | 1 | 2 | 3 | 4 | 5;
 
@@ -46,7 +38,7 @@ export default function EndRelationshipScreen({ gender }: { gender: Gender }) {
   const [restoreRequested, setRestoreRequested] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // 冷静期倒计时（step 2 时启动）
+  // 冷静期倒计时
   useEffect(() => {
     if (step === 2) {
       timerRef.current = setInterval(() => {
@@ -65,7 +57,7 @@ export default function EndRelationshipScreen({ gender }: { gender: Gender }) {
   }, [step]);
 
   const progressPercent = ((COOLING_TOTAL_SECONDS - remaining) / COOLING_TOTAL_SECONDS) * 100;
-  const isInitiator = true; // Demo 中当前用户是发起方
+  const partner = gender === "female" ? USERS.male : USERS.female;
 
   const handleExport = () => {
     if (!email.trim()) { toast("请填写邮箱地址", gender); return; }
@@ -76,580 +68,401 @@ export default function EndRelationshipScreen({ gender }: { gender: Gender }) {
     }, 2500);
   };
 
+  // 绝情背景色：随着步骤深入，颜色从暖色调变为冰冷的深灰色/黑色
+  const getBgColor = () => {
+    switch(step) {
+      case 0: return "#FDFCFB"; // 初始
+      case 1: return "#F5F5F5"; // 确认
+      case 2: return "#E2E8F0"; // 冷静期 (冷灰)
+      case 3: return "#2D3748"; // 正式结束 (深灰)
+      case 4: return "#1A202C"; // 导出 (近黑)
+      case 5: return "#000000"; // 归档 (纯黑)
+      default: return t.bg;
+    }
+  };
+
+  const getTextColor = () => {
+    return step >= 3 ? "#FFFFFF" : "#2C3E50";
+  };
+
+  const getSubTextColor = () => {
+    return step >= 3 ? "#A0AEC0" : "#7f8c8d";
+  };
+
   return (
-    <div className="h-full flex flex-col" style={{ background: t.bg }}>
+    <div className="h-full flex flex-col transition-colors duration-1000 relative overflow-hidden" style={{ background: getBgColor() }}>
+      {/* Rain/Dust Particles for "Cold" feeling */}
+      {step >= 2 && (
+        <div className="absolute inset-0 pointer-events-none opacity-20">
+          <motion.div
+            animate={{ y: [0, 1000] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            className="w-full h-full bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]"
+          />
+        </div>
+      )}
+
       {/* Header */}
-      <div className="flex items-center px-4 pt-12 pb-4">
+      <div className="flex items-center px-4 pt-12 pb-4 z-10">
         <button
           onClick={() => step === 0 ? navigate("profile", gender) : setStep((step - 1) as Step)}
           className="p-2"
         >
-          <ArrowLeft size={24} color="#2C3E50" />
+          <ArrowLeft size={24} color={getTextColor()} />
         </button>
-        <h2 className="flex-1 text-center text-lg font-bold text-[#2C3E50]">
+        <h2 className="flex-1 text-center text-lg font-black tracking-widest" style={{ color: getTextColor() }}>
           {step < 2 ? "结束关系" : step === 2 ? "冷静期" : step === 3 ? "正式结束" : step === 4 ? "数据导出" : "归档完成"}
         </h2>
         <div className="w-10" />
       </div>
 
-      {/* Progress indicator */}
-      {step > 0 && step < 5 && (
-        <div className="px-6 pb-3">
-          <div className="flex items-center gap-1.5">
-            {[1, 2, 3, 4].map((s) => (
-              <div
-                key={s}
-                className="flex-1 h-1 rounded-full transition-all duration-500"
-                style={{ background: s <= step ? "#e74c3c" : "#f0e6e0" }}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
       <AnimatePresence mode="wait">
-        {/* ─── Step 0: 信息说明 ─── */}
+        {/* ─── Step 0: 绝情预警 ─── */}
         {step === 0 && (
           <motion.div
-            key="info"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="flex-1 flex flex-col px-4 pb-8 overflow-y-auto"
+            key="step0"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="flex-1 flex flex-col px-6 pb-8"
           >
-            <div className="flex flex-col items-center mb-6">
-              <motion.img
-                src={MASCOT.thinking}
-                alt=""
-                className="w-28 h-28 mb-4"
-                animate={{ y: [0, -5, 0] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              />
-              <h3 className="text-xl font-black text-[#2C3E50] mb-2">确定要结束吗？</h3>
-              <p className="text-sm text-[#7f8c8d] text-center leading-relaxed">
-                我们理解你的决定，但希望你能再想想
+            <div className="flex flex-col items-center mb-10 mt-4">
+              <motion.div
+                animate={{ rotate: [0, -5, 5, 0], scale: [1, 0.95, 1] }}
+                transition={{ duration: 4, repeat: Infinity }}
+                className="relative mb-6"
+              >
+                <HeartOff size={80} color="#e74c3c" strokeWidth={1.5} />
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: [0, 1, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="absolute inset-0 flex items-center justify-center"
+                >
+                  <div className="w-full h-0.5 bg-[#e74c3c] rotate-45" />
+                </motion.div>
+              </motion.div>
+              <h3 className="text-2xl font-black text-[#2C3E50] mb-3">真的要切断吗？</h3>
+              <p className="text-sm text-[#7f8c8d] text-center leading-relaxed px-4">
+                一旦开始，你们之间所有的「关心信号」、「恋爱日记」和「共同回忆」都将进入不可逆的销毁倒计时。
               </p>
             </div>
 
-            <div className="space-y-3 mb-6">
-              <InfoCard
-                icon={<Clock size={20} color="#FFC800" />}
-                bg="#FFF8E1"
-                border="#FFE082"
-                title="1个月冷静期"
-                desc="提交申请后，双方同时进入1个月冷静期。期间新增操作禁用，但可随时撤回。"
-              />
-              <InfoCard
-                icon={<RotateCcw size={20} color="#4ECDC4" />}
-                bg="#E8FFF8"
-                border="#B8F0E4"
-                title="可恢复关系"
-                desc="冷静期内任意一方可发起恢复申请，发起方可直接恢复；非发起方需对方同意。"
-              />
-              <InfoCard
-                icon={<Shield size={20} color="#4A90D9" />}
-                bg="#EBF3FC"
-                border="#B8D4F0"
-                title="数据保护"
-                desc="冷静期满后正式结束，可申请全量数据导出。归档数据默认保留7天。"
-              />
-              <InfoCard
-                icon={<Heart size={20} color="#FF6B8A" />}
-                bg="#FFF0F3"
-                border="#FFD4DE"
-                title="再绑定限制"
-                desc="正式结束后3个月内不可再次建立新关系（可付费解除）。"
-              />
+            <div className="space-y-4 mb-8">
+              <div className="flex items-start gap-4 p-4 bg-white rounded-3xl border-2 border-[#f5f5f5] shadow-sm">
+                <div className="w-10 h-10 rounded-2xl bg-red-50 flex items-center justify-center flex-shrink-0">
+                  <ZapOff size={20} color="#e74c3c" />
+                </div>
+                <div>
+                  <p className="font-black text-[#2C3E50] text-sm">即刻断联</p>
+                  <p className="text-xs text-[#7f8c8d] mt-1">提交后，所有互动功能将立即禁用，你们将无法再向对方发送任何信号。</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4 p-4 bg-white rounded-3xl border-2 border-[#f5f5f5] shadow-sm">
+                <div className="w-10 h-10 rounded-2xl bg-gray-50 flex items-center justify-center flex-shrink-0">
+                  <Ghost size={20} color="#718096" />
+                </div>
+                <div>
+                  <p className="font-black text-[#2C3E50] text-sm">身份抹除</p>
+                  <p className="text-xs text-[#7f8c8d] mt-1">冷静期满后，对方的头像和名字将从你的世界彻底消失，变为「已注销用户」。</p>
+                </div>
+              </div>
             </div>
 
             <div className="flex-1" />
-            <div className="space-y-3">
+            <div className="space-y-4">
               <button
                 onClick={() => setStep(1)}
-                className="w-full py-4 rounded-2xl text-lg font-bold border-2 border-[#e74c3c] text-[#e74c3c] bg-white"
+                className="w-full py-4 rounded-2xl text-lg font-black border-2 border-[#e74c3c] text-[#e74c3c] active:bg-red-50 transition-all"
               >
-                我想好了
+                我想好了，开始断开
               </button>
               <button
                 onClick={() => navigate("home", gender)}
-                className="btn-jelly btn-jelly-green w-full py-4 text-lg rounded-2xl"
+                className="w-full py-4 rounded-2xl text-lg font-black bg-[#2C3E50] text-white shadow-lg active:scale-95 transition-all"
               >
-                再想想 💕
+                再留恋一下
               </button>
             </div>
           </motion.div>
         )}
 
-        {/* ─── Step 1: 最终确认 ─── */}
+        {/* ─── Step 1: 最终确认 (破碎感) ─── */}
         {step === 1 && (
           <motion.div
-            key="confirm"
-            initial={{ opacity: 0, x: 20 }}
+            key="step1"
+            initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="flex-1 flex flex-col px-4 pb-8 overflow-y-auto"
+            exit={{ opacity: 0, scale: 1.1 }}
+            className="flex-1 flex flex-col px-6 pb-8"
           >
-            <div className="flex flex-col items-center mb-6 mt-2">
-              <div className="w-20 h-20 bg-[#FFF0F3] rounded-full flex items-center justify-center mb-4">
-                <AlertTriangle size={36} color="#e74c3c" />
+            <div className="flex flex-col items-center mb-8 mt-4">
+              <div className="w-24 h-24 relative mb-6">
+                <img src={partner.avatar} className="w-full h-full rounded-full object-cover grayscale opacity-60" alt="" />
+                <div className="absolute inset-0 border-4 border-dashed border-red-500 rounded-full animate-spin-slow" />
+                <X className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" size={48} color="#e74c3c" />
               </div>
-              <h3 className="text-xl font-black text-[#2C3E50] mb-2">最终确认</h3>
-              <p className="text-sm text-[#7f8c8d] text-center leading-relaxed">
-                点击确认后双方同时进入1个月冷静期
+              <h3 className="text-2xl font-black text-[#2C3E50] mb-2">最后一次确认</h3>
+              <p className="text-sm text-[#7f8c8d] text-center">
+                你确定要放弃与 <span className="font-black text-[#2C3E50]">{partner.name}</span> 的这段关系吗？
               </p>
             </div>
 
-            {/* Partner card */}
-            <div className="love-card flex items-center gap-3 mb-4">
-              <img
-                src={gender === "female" ? USERS.male.avatar : USERS.female.avatar}
-                alt=""
-                className="w-12 h-12 rounded-full object-cover"
-              />
-              <div className="flex-1">
-                <p className="font-bold text-[#2C3E50] text-sm">
-                  {gender === "female" ? USERS.male.name : USERS.female.name}
-                </p>
-                <p className="text-xs text-[#7f8c8d]">在一起 {COUPLE_INFO.daysInLove} 天</p>
-              </div>
-              <div className="text-right">
-                <p className="text-xs font-bold text-[#e74c3c]">即将分开</p>
-              </div>
-            </div>
-
-            {/* Reason selection */}
-            <div className="mb-6">
-              <p className="text-sm font-bold text-[#2C3E50] mb-2">请选择原因（可选）</p>
-              <div className="space-y-2">
-                {["感情淡了", "距离太远", "性格不合", "发展方向不同", "其他原因"].map((reason) => (
+            <div className="bg-white rounded-[32px] p-6 border-2 border-[#f5f5f5] mb-8">
+              <p className="text-xs font-black text-[#7f8c8d] mb-4 uppercase tracking-widest">请选择断开的原因</p>
+              <div className="space-y-3">
+                {["感情已逝", "无法逾越的距离", "性格极度不合", "对方让我失望", "不再爱了"].map((reason) => (
                   <button
                     key={reason}
-                    className={`w-full love-card text-left text-sm transition-all flex items-center justify-between ${
-                      selectedReason === reason ? "border-[#e74c3c] bg-[#FFF0F3]" : ""
+                    onClick={() => setSelectedReason(reason)}
+                    className={`w-full p-4 rounded-2xl text-left text-sm font-bold transition-all flex items-center justify-between ${
+                      selectedReason === reason ? "bg-red-50 border-2 border-red-200 text-red-600" : "bg-[#f9f9f9] border-2 border-transparent text-[#4A5568]"
                     }`}
-                    style={selectedReason === reason ? { borderColor: "#e74c3c" } : undefined}
-                    onClick={() => setSelectedReason(selectedReason === reason ? null : reason)}
                   >
-                    <span className="text-[#2C3E50]">{reason}</span>
-                    {selectedReason === reason && (
-                      <CheckCircle2 size={16} color="#e74c3c" />
-                    )}
+                    {reason}
+                    {selectedReason === reason && <CheckCircle2 size={18} />}
                   </button>
                 ))}
               </div>
             </div>
 
             <div className="flex-1" />
-            <div className="space-y-3">
-              <button
-                onClick={() => setStep(2)}
-                className="w-full py-4 rounded-2xl text-lg font-bold bg-[#e74c3c] text-white"
-              >
-                确认提交，进入冷静期
-              </button>
-              <button
-                onClick={() => setStep(0)}
-                className="w-full py-3 text-[#7f8c8d] font-semibold"
-              >
-                返回
-              </button>
-            </div>
+            <button
+              onClick={() => setStep(2)}
+              disabled={!selectedReason}
+              className={`w-full py-5 rounded-3xl text-xl font-black transition-all shadow-xl ${
+                selectedReason ? "bg-[#e74c3c] text-white active:scale-95" : "bg-gray-200 text-gray-400 cursor-not-allowed"
+              }`}
+            >
+              提交申请，进入冷静期
+            </button>
           </motion.div>
         )}
 
-        {/* ─── Step 2: 冷静期 ─── */}
+        {/* ─── Step 2: 冷静期 (冰冷感) ─── */}
         {step === 2 && (
           <motion.div
-            key="cooling"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="flex-1 flex flex-col px-4 pb-8 overflow-y-auto"
+            key="step2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex-1 flex flex-col px-6 pb-8"
           >
-            {/* Top banner */}
-            <div className="bg-[#FFF8E1] border border-[#FFE082] rounded-2xl px-4 py-3 mb-4 flex items-center gap-2">
-              <Clock size={16} color="#FFC800" />
-              <p className="text-xs text-[#7f8c8d] flex-1">
-                <span className="font-bold text-[#2C3E50]">冷静期进行中</span>
-                {" · "}由{gender === "female" ? "你" : "你"}发起
+            <div className="bg-white/50 backdrop-blur-md rounded-3xl p-4 mb-8 flex items-center gap-3 border border-white/50">
+              <Wind size={20} color="#718096" />
+              <p className="text-xs font-bold text-[#4A5568]">
+                关系冻结中 · 剩余时间将决定最终的走向
               </p>
             </div>
 
-            {/* Mascot */}
-            <div className="flex flex-col items-center mb-5">
-              <motion.img
-                src={MASCOT.thinking}
-                alt=""
-                className="w-24 h-24 mb-3"
-                animate={{ y: [0, -6, 0] }}
-                transition={{ duration: 2.5, repeat: Infinity }}
-              />
-              <h3 className="text-lg font-black text-[#2C3E50] mb-1">冷静期已开始</h3>
-              <p className="text-xs text-[#7f8c8d] text-center leading-relaxed">
-                1个月内可随时撤回申请恢复关系
-              </p>
-            </div>
-
-            {/* Countdown */}
-            <div className="love-card bg-[#FFF0F3] border-[#FFD4DE] mb-4">
-              <div className="text-center py-3">
-                <p className="text-[10px] text-[#7f8c8d] mb-2 font-semibold uppercase tracking-wider">剩余冷静时间</p>
-                <motion.p
-                  className="text-4xl font-black text-[#e74c3c] mb-2"
-                  style={{ fontFamily: "'Nunito', sans-serif" }}
-                  animate={{ scale: [1, 1.02, 1] }}
-                  transition={{ duration: 1, repeat: Infinity }}
-                >
-                  {remaining === 0 ? "00:00:00" : formatTime(remaining)}
-                </motion.p>
-                {/* Progress bar */}
-                <div className="h-2 bg-[#FFD4DE] rounded-full overflow-hidden">
-                  <motion.div
-                    className="h-full bg-[#e74c3c] rounded-full"
-                    style={{ width: `${progressPercent}%` }}
-                    transition={{ duration: 0.5 }}
+            <div className="flex-1 flex flex-col items-center justify-center">
+              <div className="relative w-64 h-64 flex items-center justify-center mb-8">
+                {/* Countdown Circle */}
+                <svg className="w-full h-full -rotate-90">
+                  <circle cx="128" cy="128" r="120" fill="none" stroke="#EDF2F7" strokeWidth="8" />
+                  <motion.circle
+                    cx="128" cy="128" r="120" fill="none" stroke="#718096" strokeWidth="8"
+                    strokeDasharray="754"
+                    animate={{ strokeDashoffset: 754 * (1 - progressPercent / 100) }}
+                    transition={{ duration: 1 }}
                   />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <p className="text-[10px] font-black text-[#718096] uppercase tracking-[0.2em] mb-2">冷静期倒计时</p>
+                  <p className="text-4xl font-black text-[#2D3748] font-mono">{formatTime(remaining)}</p>
+                  <div className="mt-4 flex items-center gap-2 px-3 py-1 bg-white/80 rounded-full">
+                    <CloudRain size={12} color="#718096" />
+                    <span className="text-[10px] font-bold text-[#718096]">感情正在冷却</span>
+                  </div>
                 </div>
-                <p className="text-[10px] text-[#7f8c8d] mt-1.5">
-                  已过 {Math.round(progressPercent)}%
+              </div>
+
+              <div className="text-center px-6">
+                <h4 className="text-lg font-black text-[#2D3748] mb-2">世界正在变灰</h4>
+                <p className="text-xs text-[#718096] leading-relaxed">
+                  在这段时间里，你们无法查看对方的动态。如果倒计时结束前没有撤回，这段关系将永久尘封。
                 </p>
               </div>
             </div>
 
-            {/* Cooling period rules */}
-            <div className="love-card mb-4 space-y-2">
-              <p className="text-xs font-bold text-[#2C3E50] mb-1">冷静期规则</p>
-              {[
-                { icon: "🚫", text: "新增信号/消息/纪念日等操作已暂停" },
-                { icon: "✅", text: "查看、修改、删除、导出仍可使用" },
-                { icon: "💕", text: "任意一方可发起恢复申请" },
-              ].map((rule, i) => (
-                <div key={i} className="flex items-start gap-2">
-                  <span className="text-sm">{rule.icon}</span>
-                  <p className="text-xs text-[#7f8c8d] leading-relaxed">{rule.text}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Restore request section */}
-            {!isInitiator && !restoreRequested && (
-              <div className="love-card bg-[#E8FFF8] border-[#B8F0E4] mb-4">
-                <p className="text-xs text-[#7f8c8d] mb-2">
-                  对方发起了结束申请，你可以请求恢复关系
-                </p>
-                <button
-                  onClick={() => { setRestoreRequested(true); toast("恢复申请已发送，等待对方确认", gender); }}
-                  className="w-full py-2.5 rounded-xl text-sm font-bold text-white"
-                  style={{ background: "#4ECDC4" }}
-                >
-                  申请恢复关系
-                </button>
-              </div>
-            )}
-            {restoreRequested && (
-              <div className="love-card bg-[#E8FFF8] border-[#B8F0E4] mb-4 flex items-center gap-2">
-                <Clock size={16} color="#4ECDC4" />
-                <p className="text-xs text-[#7f8c8d]">恢复申请已发送，等待对方确认...</p>
-              </div>
-            )}
-
-            <div className="flex-1" />
-            <div className="space-y-3">
-              {/* 发起方可直接撤回 */}
-              {isInitiator && (
-                <button
-                  onClick={() => {
-                    toast("已撤回申请，关系已恢复！💕", gender);
-                    setTimeout(() => navigate("home", gender), 1200);
-                  }}
-                  className="btn-jelly btn-jelly-green w-full py-4 text-base rounded-2xl"
-                >
-                  撤回申请，恢复关系 💕
-                </button>
-              )}
-              {/* 冷静期满后可进入正式结束 */}
-              {remaining === 0 && (
-                <button
-                  onClick={() => setStep(3)}
-                  className="w-full py-4 rounded-2xl text-base font-bold bg-[#e74c3c] text-white"
-                >
-                  冷静期已满，正式结束关系
-                </button>
-              )}
-              {/* Demo: 跳过冷静期 */}
+            <div className="space-y-4 mt-8">
+              <button
+                onClick={() => { toast("申请已撤回，关系恢复 ❤️", gender); navigate("home", gender); }}
+                className="w-full py-4 rounded-2xl text-lg font-black bg-white text-[#2D3748] border-2 border-[#2D3748] active:scale-95 transition-all"
+              >
+                我后悔了，撤回申请
+              </button>
               <button
                 onClick={() => setStep(3)}
-                className="w-full py-3 text-[#b0b0b0] text-xs font-semibold"
+                className="w-full py-4 text-xs font-bold text-[#718096] underline"
               >
-                [演示] 跳过冷静期 →
+                跳过冷静期 (仅限演示)
               </button>
             </div>
           </motion.div>
         )}
 
-        {/* ─── Step 3: 正式结束二次确认 ─── */}
+        {/* ─── Step 3: 正式结束 (深渊感) ─── */}
         {step === 3 && (
           <motion.div
-            key="final"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="flex-1 flex flex-col px-4 pb-8 overflow-y-auto"
-          >
-            <div className="flex flex-col items-center mb-6 mt-2">
-              <div className="w-20 h-20 bg-[#FFF0F3] rounded-full flex items-center justify-center mb-4">
-                <Trash2 size={36} color="#e74c3c" />
-              </div>
-              <h3 className="text-xl font-black text-[#2C3E50] mb-2">正式结束关系</h3>
-              <p className="text-sm text-[#7f8c8d] text-center leading-relaxed">
-                此操作不可逆，关系将正式结束并进入归档
-              </p>
-            </div>
-
-            <div className="space-y-3 mb-6">
-              <InfoCard
-                icon={<Archive size={18} color="#7f8c8d" />}
-                bg="#F7F3F0"
-                border="#e8e0d8"
-                title="数据归档"
-                desc="关系数据进入归档态，默认保留7天，期间可申请全量导出。"
-              />
-              <InfoCard
-                icon={<Lock size={18} color="#FF6B35" />}
-                bg="#FFF4EE"
-                border="#FFD4B8"
-                title="再绑定限制"
-                desc="正式结束后3个月内不可再次建立新关系（可付费解除）。"
-              />
-              <InfoCard
-                icon={<FileText size={18} color="#4A90D9" />}
-                bg="#EBF3FC"
-                border="#B8D4F0"
-                title="数据导出"
-                desc="可在归档期内申请全量数据导出，包含日记、相册、信号等所有内容。"
-              />
-            </div>
-
-            <div className="flex-1" />
-            <div className="space-y-3">
-              <button
-                onClick={() => setStep(4)}
-                className="w-full py-4 rounded-2xl text-lg font-bold bg-[#e74c3c] text-white"
-              >
-                确认正式结束关系
-              </button>
-              <button
-                onClick={() => setStep(2)}
-                className="w-full py-3 text-[#7f8c8d] font-semibold"
-              >
-                返回冷静期
-              </button>
-            </div>
-          </motion.div>
-        )}
-
-        {/* ─── Step 4: 数据导出 ─── */}
-        {step === 4 && (
-          <motion.div
-            key="export"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="flex-1 flex flex-col px-4 pb-8 overflow-y-auto"
-          >
-            <div className="flex flex-col items-center mb-6 mt-2">
-              <motion.div
-                className="w-20 h-20 bg-[#EBF3FC] rounded-full flex items-center justify-center mb-4"
-                animate={{ scale: [1, 1.05, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                <Download size={36} color="#4A90D9" />
-              </motion.div>
-              <h3 className="text-xl font-black text-[#2C3E50] mb-2">导出你的回忆</h3>
-              <p className="text-sm text-[#7f8c8d] text-center leading-relaxed">
-                我们将打包你的全部数据，通过邮件发送下载链接
-              </p>
-            </div>
-
-            {/* Export contents */}
-            <div className="love-card mb-4">
-              <p className="text-xs font-bold text-[#2C3E50] mb-3">导出内容包含</p>
-              <div className="grid grid-cols-2 gap-2">
-                {[
-                  { emoji: "💌", label: "关心信号记录" },
-                  { emoji: "💬", label: "聊天记录" },
-                  { emoji: "📸", label: "相册与照片" },
-                  { emoji: "📝", label: "恋爱日记" },
-                  { emoji: "🎂", label: "纪念日记录" },
-                  { emoji: "🌟", label: "愿望清单" },
-                ].map((item) => (
-                  <div key={item.label} className="flex items-center gap-2 py-1">
-                    <span className="text-base">{item.emoji}</span>
-                    <span className="text-xs text-[#7f8c8d]">{item.label}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Email input */}
-            {!exportDone ? (
-              <>
-                <div className="love-card mb-4">
-                  <p className="text-xs font-bold text-[#2C3E50] mb-2">接收邮箱</p>
-                  <div className="flex items-center gap-2">
-                    <Mail size={16} color="#7f8c8d" className="flex-shrink-0" />
-                    <input
-                      type="email"
-                      placeholder="输入你的邮箱地址..."
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="flex-1 bg-transparent outline-none text-sm text-[#2C3E50] placeholder-[#b0b0b0]"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex-1" />
-                <div className="space-y-3">
-                  <button
-                    onClick={handleExport}
-                    disabled={exporting}
-                    className="w-full py-4 rounded-2xl text-lg font-bold text-white flex items-center justify-center gap-2"
-                    style={{ background: exporting ? "#b0b0b0" : "#4A90D9" }}
-                  >
-                    {exporting ? (
-                      <>
-                        <motion.div
-                          className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
-                        />
-                        打包中...
-                      </>
-                    ) : (
-                      <>
-                        <Download size={20} />
-                        申请导出全量数据
-                      </>
-                    )}
-                  </button>
-                  <button
-                    onClick={() => setStep(5)}
-                    className="w-full py-3 text-[#7f8c8d] font-semibold text-sm"
-                  >
-                    跳过，直接完成归档
-                  </button>
-                </div>
-              </>
-            ) : (
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                className="flex-1 flex flex-col items-center justify-center gap-4"
-              >
-                <CheckCircle2 size={56} color="#58CC02" />
-                <div className="text-center">
-                  <p className="font-black text-[#2C3E50] text-lg mb-1">导出申请已提交</p>
-                  <p className="text-sm text-[#7f8c8d] leading-relaxed">
-                    数据包将在 24 小时内发送至
-                    <br />
-                    <span className="font-bold text-[#4A90D9]">{email}</span>
-                  </p>
-                </div>
-                <button
-                  onClick={() => setStep(5)}
-                  className="mt-4 w-full py-4 rounded-2xl text-lg font-bold text-white"
-                  style={{ background: "#58CC02" }}
-                >
-                  完成归档
-                </button>
-              </motion.div>
-            )}
-          </motion.div>
-        )}
-
-        {/* ─── Step 5: 归档完成 ─── */}
-        {step === 5 && (
-          <motion.div
-            key="done"
-            initial={{ opacity: 0, scale: 0.9 }}
+            key="step3"
+            initial={{ opacity: 0, scale: 1.2 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ type: "spring", stiffness: 200, damping: 15 }}
-            className="flex-1 flex flex-col items-center justify-center px-6 gap-5"
+            className="flex-1 flex flex-col px-8 pb-8 text-white"
           >
-            <motion.img
-              src={MASCOT.love}
-              alt=""
-              className="w-32 h-32"
-              animate={{ y: [0, -8, 0] }}
-              transition={{ duration: 2.5, repeat: Infinity }}
-            />
-            <div className="text-center">
-              <h3 className="text-2xl font-black text-[#2C3E50] mb-2">关系已归档</h3>
-              <p className="text-sm text-[#7f8c8d] leading-relaxed">
-                感谢你们曾经在一起的每一天
-                <br />
-                美好的回忆将永远留存
+            <div className="flex-1 flex flex-col items-center justify-center text-center">
+              <motion.div
+                animate={{ scale: [1, 0.8, 1], opacity: [1, 0.5, 1] }}
+                transition={{ duration: 3, repeat: Infinity }}
+                className="mb-8"
+              >
+                <HeartOff size={100} color="#e74c3c" strokeWidth={1} />
+              </motion.div>
+              <h3 className="text-3xl font-black mb-4">终局已至</h3>
+              <p className="text-sm text-gray-400 leading-relaxed mb-8">
+                冷静期已结束。点击下方按钮，你们在 LoveBrain 的所有数据将被打包并从服务器彻底抹除。
               </p>
-            </div>
-
-            {/* Archive info */}
-            <div className="love-card w-full bg-[#F7F3F0] border-[#e8e0d8]">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-[#7f8c8d]">归档数据保留至</span>
-                  <span className="text-xs font-bold text-[#2C3E50]">7天后自动删除</span>
+              
+              <div className="w-full space-y-4">
+                <div className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl border border-white/10">
+                  <Archive size={20} className="text-gray-500" />
+                  <div className="text-left">
+                    <p className="text-sm font-bold">回忆归档</p>
+                    <p className="text-[10px] text-gray-500">所有照片和日记将转为只读离线包</p>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-[#7f8c8d]">再绑定限制</span>
-                  <span className="text-xs font-bold text-[#e74c3c]">3个月后解除</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-[#7f8c8d]">延长保存</span>
-                  <button
-                    onClick={() => toast("爱情银行功能即将上线", gender)}
-                    className="text-xs font-bold flex items-center gap-1"
-                    style={{ color: "#FFC800" }}
-                  >
-                    爱情银行 <ChevronRight size={12} />
-                  </button>
+                <div className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl border border-white/10">
+                  <Trash2 size={20} className="text-red-900" />
+                  <div className="text-left">
+                    <p className="text-sm font-bold">身份注销</p>
+                    <p className="text-[10px] text-gray-500">你们的绑定关系将从全网抹除</p>
+                  </div>
                 </div>
               </div>
             </div>
 
             <button
-              onClick={() => navigate("home", gender)}
-              className="w-full py-4 rounded-2xl text-base font-bold text-white"
-              style={{ background: "#7f8c8d" }}
+              onClick={() => setStep(4)}
+              className="w-full py-5 rounded-3xl bg-white text-black font-black text-xl shadow-[0_0_30px_rgba(255,255,255,0.2)] active:scale-95 transition-all"
             >
-              返回首页
+              彻底终结
+            </button>
+          </motion.div>
+        )}
+
+        {/* ─── Step 4: 数据导出 (黑客/工业感) ─── */}
+        {step === 4 && (
+          <motion.div
+            key="step4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex-1 flex flex-col px-8 pb-8 text-white"
+          >
+            <div className="mt-12 mb-10">
+              <h3 className="text-2xl font-black mb-2">遗物打包</h3>
+              <p className="text-xs text-gray-500">输入邮箱，接收你们这段关系的最后遗物</p>
+            </div>
+
+            <div className="space-y-6">
+              <div className="relative">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={20} />
+                <input
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="your-email@example.com"
+                  className="w-full bg-white/5 border-2 border-white/10 rounded-2xl py-4 pl-12 pr-4 outline-none focus:border-white/30 transition-all font-mono text-sm"
+                />
+              </div>
+
+              <div className="bg-white/5 rounded-3xl p-6 border border-white/10">
+                <p className="text-[10px] font-black text-gray-500 uppercase mb-4 tracking-widest">导出清单</p>
+                <div className="space-y-3">
+                  {[
+                    { label: "1,242 条聊天记录", size: "2.4MB" },
+                    { label: "86 张珍贵相片", size: "142MB" },
+                    { label: "12 篇恋爱日记", size: "45KB" },
+                    { label: "5 个共同愿望", size: "12KB" },
+                  ].map((item) => (
+                    <div key={item.label} className="flex items-center justify-between text-xs">
+                      <span className="text-gray-300">{item.label}</span>
+                      <span className="font-mono text-gray-600">{item.size}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex-1" />
+            
+            <button
+              onClick={handleExport}
+              disabled={exporting || exportDone}
+              className="w-full py-5 rounded-3xl bg-red-600 text-white font-black text-xl relative overflow-hidden group"
+            >
+              {exporting ? (
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: "100%" }}
+                  transition={{ duration: 2.5 }}
+                  className="absolute inset-0 bg-red-800"
+                />
+              ) : null}
+              <span className="relative z-10 flex items-center justify-center gap-2">
+                {exporting ? "正在粉碎并打包..." : exportDone ? "已发送至邮箱" : "确认导出并销毁"}
+                {!exporting && !exportDone && <Download size={20} />}
+                {exportDone && <CheckCircle2 size={20} />}
+              </span>
+            </button>
+
+            {exportDone && (
+              <motion.button
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                onClick={() => setStep(5)}
+                className="w-full py-4 text-sm font-bold text-gray-400 mt-4"
+              >
+                继续
+              </motion.button>
+            )}
+          </motion.div>
+        )}
+
+        {/* ─── Step 5: 归档完成 (虚无感) ─── */}
+        {step === 5 && (
+          <motion.div
+            key="step5"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex-1 flex flex-col items-center justify-center px-10 text-center text-white"
+          >
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", delay: 0.5 }}
+              className="w-24 h-24 bg-white/10 rounded-full flex items-center justify-center mb-8"
+            >
+              <Ghost size={48} color="white" className="opacity-20" />
+            </motion.div>
+            <h3 className="text-3xl font-black mb-4">再见，{partner.name}</h3>
+            <p className="text-sm text-gray-500 leading-relaxed mb-12">
+              你们的关系已正式归档。从这一刻起，LoveBrain 将不再保留关于你们的任何实时数据。
+            </p>
+            
+            <div className="w-full p-6 bg-white/5 rounded-[32px] border border-white/10 mb-12">
+              <p className="text-xs text-gray-400 mb-2">根据《恋爱脑保护协议》</p>
+              <p className="text-sm font-bold text-gray-200">
+                你在 90 天内无法建立新的关系
+              </p>
+            </div>
+
+            <button
+              onClick={() => window.location.reload()}
+              className="px-8 py-4 rounded-2xl bg-white/10 text-white font-black text-sm border border-white/20 active:scale-95 transition-all"
+            >
+              回到现实世界
             </button>
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
-  );
-}
-
-/* ─── Info Card Component ─── */
-function InfoCard({
-  icon, bg, border, title, desc,
-}: {
-  icon: React.ReactNode;
-  bg: string;
-  border: string;
-  title: string;
-  desc: string;
-}) {
-  return (
-    <div
-      className="love-card flex items-start gap-3"
-      style={{ background: bg, borderColor: border }}
-    >
-      <div className="flex-shrink-0 mt-0.5">{icon}</div>
-      <div>
-        <p className="font-bold text-[#2C3E50] text-sm">{title}</p>
-        <p className="text-xs text-[#7f8c8d] mt-1 leading-relaxed">{desc}</p>
-      </div>
     </div>
   );
 }
